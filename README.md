@@ -3,7 +3,7 @@
   <img src="https://dot-sys.github.io/VortexCSRSSTool/Assets/VortexLogo.svg" alt="Vortex Logo" width="100" height="100">
 </p>
 
-<h2 align="center">Vortex CSRSS Tool</h2>
+<h2 align="center">Vortex Viewer</h2>
 
 <p align="center">
   A lightweight Tool for quick triage in live Win10/11 Systems, extracting Journal, Execution Timeline and Drive-Logs, as well as an included Process Memory String Parsing Tool. <br><br>
