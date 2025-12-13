@@ -1,0 +1,414 @@
+﻿<Page
+x:Class="Vortex.UI.Views.ProcessesView"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:controls="clr-namespace:Vortex.UI.Controls"
+xmlns:vm="clr-namespace:Vortex.UI.ViewModels"
+Title="ProcessesView"
+Background="Transparent">
+
+<Page.Resources>
+        <!-- ComboBox style with complete black background control template -->
+        <Style x:Key="BlackComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Editable TextBox -->
+                            <TextBox x:Name="PART_EditableTextBox"
+                                     Grid.Column="0"
+                                     Background="#000000"
+                                     Foreground="White"
+                                     BorderBrush="#333333"
+                                     BorderThickness="1,1,0,1"
+                                     Padding="4,3"
+                                     IsReadOnly="{TemplateBinding IsReadOnly}"
+                                     CaretBrush="White"
+                                     Text="{Binding Path=Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsEditable, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                            
+                            <!-- Placeholder overlay -->
+                            <TextBlock Grid.Column="0"
+                                       Text="Choose Process"
+                                       Foreground="Gray"
+                                       FontFamily="Consolas"
+                                       Padding="7,0,0,0"
+                                       IsHitTestVisible="False"
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding IsEditable, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="True"/>
+                                                    <Condition Binding="{Binding Text, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value=""/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            
+                            <!-- Toggle Button -->
+                            <ToggleButton Grid.Column="1"
+                                          Background="#000000"
+                                          BorderBrush="#333333"
+                                          BorderThickness="1"
+                                          Width="20"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}">
+                                            <Path x:Name="Arrow"
+                                                  Data="M 0 0 L 4 4 L 8 0 Z"
+                                                  Fill="White"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#1a1a1a"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            
+                            <!-- Popup -->
+                            <Popup x:Name="PART_Popup"
+                                   PlacementTarget="{Binding ElementName=PART_EditableTextBox}"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Border Background="#000000"
+                                        BorderBrush="#333333"
+                                        BorderThickness="1"
+                                        MaxHeight="400"
+                                        MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ScrollViewer>
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- ComboBox dropdown background style -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1a1a1a"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#2a2a2a"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Border Background="#000000" CornerRadius="0,0,8,8">
+        <StackPanel Margin="20">
+        <!-- Main layout grid: left and right sections -->
+        <Grid Margin="0,-10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <!-- Left section -->
+            <StackPanel Grid.Column="0" Orientation="Vertical">
+                <!-- First row: Get Strings, Dropdown, Search -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                    <Button Content="Get Strings"
+                            Command="{Binding GetStringsCommand}"
+                            Width="100"
+                            Height="30"
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Top"/>
+                    
+                    <ComboBox x:Name="ProcessComboBox"
+                              ItemsSource="{Binding ProcessesView}"
+                              DisplayMemberPath="."
+                              SelectedItem="{Binding SelectedProcess, Mode=TwoWay}"
+                              IsEditable="True"
+                              IsTextSearchEnabled="False"
+                              IsTextSearchCaseSensitive="False"
+                              Text="{Binding ProcessFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Width="350"
+                              Height="30"
+                              Margin="0,0,8,0"
+                              VerticalAlignment="Top"
+                              Style="{StaticResource BlackComboBoxStyle}"
+                              GotFocus="ProcessComboBox_GotFocus"
+                              PreviewMouseLeftButtonDown="ProcessComboBox_PreviewMouseLeftButtonDown">
+                    </ComboBox>
+                    
+                    <!-- Search TextBox with overlay placeholder (matching JournalView/TimelineView pattern) -->
+                    <Grid Width="300">
+                        <TextBox x:Name="SearchTextBox"
+                                 Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 SpellCheck.IsEnabled="False"
+                                 TextWrapping="NoWrap"
+                                 Height="30"/>
+                        
+                        <!-- Placeholder overlay for Search Strings -->
+                        <TextBlock Text="Search Strings (regex allowed)"
+                                   Foreground="Gray"
+                                   FontFamily="Consolas"
+                                   Padding="9,0,0,0"
+                                   IsHitTestVisible="False"
+                                   VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=SearchTextBox, Path=Text}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+                <!-- Second row: Min/Max Length -->
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0" VerticalAlignment="Top">
+                    <Button Content="Get PCA"
+                            Command="{Binding GetPCACommand}"
+                            Width="100"
+                            Height="30"
+                            Margin="0,0,16,0"
+                            ToolTip="Extract PCA (Program Compatibility Assistant) traces from Explorer.exe, RuntimeBroker.exe, and PCASVC"/>
+                    <TextBlock Text="Min.:" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Minimum string length to extract from process memory."/>
+                    <TextBox x:Name="MinLengthBox"
+                             Width="40"
+                             Text="{Binding MinLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             SpellCheck.IsEnabled="False"
+                             TextWrapping="Wrap"
+                             Background="Black"
+                             VerticalAlignment="Center"
+                             Margin="0,0,16,0"
+                             ToolTip="Minimum string length to extract from process memory."/>
+                    <TextBlock Text="Max.:" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Maximum string length to extract. Leave blank or use ∞ for unlimited."/>
+                    <TextBox x:Name="MaxLengthBox"
+                             Width="60"
+                             Text="{Binding MaxLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             SpellCheck.IsEnabled="False"
+                             TextWrapping="Wrap"
+                             VerticalAlignment="Center"
+                             ToolTip="Maximum string length to extract. Leave blank or use ∞ for unlimited.">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <VisualBrush Stretch="None" AlignmentX="Left">
+                                                    <VisualBrush.Visual>
+                                                        <TextBlock Text="∞" 
+                                                                  Foreground="Gray" 
+                                                                  FontFamily="Consolas"
+                                                                  Margin="5,0,0,0"
+                                                                  VerticalAlignment="Center"/>
+                                                    </VisualBrush.Visual>
+                                                </VisualBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    <!-- Regex checkbox added here -->
+                    <CheckBox Content="Regex"
+                              IsChecked="{Binding IsRegexSearch, Mode=TwoWay}"
+                              VerticalAlignment="Center"
+                              Margin="152,0,0,0"
+                              ToolTip="Enable regex search for string filtering."/>
+                    <CheckBox Content="Starts with"
+                              IsChecked="{Binding IsStartsWithSearch, Mode=TwoWay}"
+                              VerticalAlignment="Center"
+                              Margin="38,0,0,0"
+                              ToolTip="Filter strings that start with the search text."/>
+                    <CheckBox Content="Ends with"
+                              IsChecked="{Binding IsEndsWithSearch, Mode=TwoWay}"
+                              VerticalAlignment="Center"
+                              Margin="38,0,0,0"
+                              ToolTip="Filter strings that end with the search text."/>
+                </StackPanel>
+            </StackPanel>
+            <!-- Right section: 3 columns, each with 2 checkboxes stacked vertically -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="32,0,0,0" VerticalAlignment="Top">
+                <!-- Left column -->
+                <StackPanel Orientation="Vertical" Margin="0,0,16,0">
+                    <CheckBox Content="Unicode Strings"
+                              IsChecked="{Binding UnicodeStrings, Mode=TwoWay}"
+                              Foreground="White"
+                              Margin="0,2,0,2"
+                              ToolTip="Extracts Unicode strings from process memory." />
+                    <CheckBox Content="Combine Processes"
+                              IsChecked="{Binding CombineProcesses, Mode=TwoWay}"
+                              Foreground="White"
+                              Margin="0,2,0,2"
+                              ToolTip="Groups all processes with the same name and combines their results. WARNING: May be slow and use heavy resources for large processes." />
+                </StackPanel>
+                <!-- Middle column -->
+                <StackPanel Orientation="Vertical" Margin="0,0,16,0">
+                    <CheckBox Content="Reduce Duplicates"
+                              IsChecked="{Binding ReduceDuplicates, Mode=TwoWay}"
+                              Foreground="White"
+                              Margin="0,2,0,2"
+                              ToolTip="Removes duplicate strings from the results." />
+                    <CheckBox Content="Reduce Nonsense strings"
+                              IsChecked="{Binding ReduceNonsenseStrings, Mode=TwoWay}"
+                              Foreground="White"
+                              Margin="0,2,0,2"
+                              ToolTip="Filters out strings that are likely random or meaningless." />
+                </StackPanel>
+                <!-- Right column -->
+                <StackPanel Orientation="Vertical">
+                    <CheckBox Content="Win Path Strings"
+                              IsChecked="{Binding WinPathStringsFilter, Mode=TwoWay}"
+                              Foreground="White"
+                              Margin="0,2,0,2"
+                              ToolTip="Extracts Windows-style file paths (e.g. C:\Path\to\File.exe) from process memory." />
+                    <CheckBox Content="URL Strings"
+                              IsChecked="{Binding UrlStringsFilter, Mode=TwoWay}"
+                              Foreground="White"
+                              Margin="0,2,0,2"
+                              ToolTip="Extracts web URLs (e.g. https://example.com) from process memory, following RFC 3986." />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+        <!-- Rest of your layout unchanged -->
+        <DataGrid x:Name="StringsDataGrid"
+                  Style="{StaticResource VortexDataGridStyle}"
+                  ItemsSource="{Binding MemoryStrings}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  HeadersVisibility="Column"
+                  Margin="0,15,0,0"
+                  Height="568"
+                  Width="1358"
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow">
+            <DataGrid.ContextMenu>
+                <ContextMenu Style="{StaticResource VortexDataGridContextMenuStyle}">
+                    <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
+                    <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Stringlist" Binding="{Binding .}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <!-- Bottom info and pagination -->
+        <Grid Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <!-- Left side: Info -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Show Process Uptimes"
+                        Margin="0,0,10,0"
+                        Command="{Binding ShowUptimesCommand}" 
+                        VerticalAlignment="Center"/>
+                <TextBlock VerticalAlignment="Center" FontWeight="Bold" 
+                           Foreground="White">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0}/{1} Strings">
+                            <Binding Path="FilteredEntriesCount"/>
+                            <Binding Path="ExtractedStringsCount"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </StackPanel>
+
+            <!-- Middle: Loading indicator -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock x:Name="LoadingTextBlock" Text="Loading" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                <TextBlock x:Name="DotsTextBlock" FontWeight="Bold" Foreground="White" FontSize="14" Margin="2,0,0,0"/>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLoadingStrings}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsLoadingPCA}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+            </StackPanel>
+
+            <!-- Right side: Pagination Controls (matching JournalView style) -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="First" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="Go to first page" FontSize="11"/>
+                <Button Content="&lt;" Command="{Binding PrevPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="Previous page" FontSize="11"/>
+                <TextBlock VerticalAlignment="Center" Margin="4,0,4,0" FontSize="11" 
+                           Foreground="White">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0} / {1}">
+                            <Binding Path="CurrentPage"/>
+                            <Binding Path="TotalPages"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <Button Content="&gt;" Command="{Binding NextPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="Next page" FontSize="11"/>
+                <Button Content="Last" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="Go to last page" FontSize="11"/>
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+    </Border>
+</Page>

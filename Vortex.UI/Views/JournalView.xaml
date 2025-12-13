@@ -1,0 +1,228 @@
+<Page
+x:Class="Vortex.UI.Views.JournalView"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:vm="clr-namespace:Vortex.UI.ViewModels"
+xmlns:controls="clr-namespace:Vortex.UI.Controls"
+Title="Journal"
+Background="Transparent">
+
+<!-- Page content with black background and rounded bottom corners -->
+<Border Background="#000000" CornerRadius="0,0,8,8">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toggle buttons -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8"
+                    IsEnabled="{Binding IsNotLoading}">
+            <ToggleButton Content="Created" IsChecked="{Binding FilterCreated, Mode=TwoWay}" Margin="0,0,4,0"/>
+            <ToggleButton Content="Deleted" IsChecked="{Binding FilterDeleted, Mode=TwoWay}" Margin="0,0,4,0"/>
+            <ToggleButton Content="Renamed" IsChecked="{Binding FilterRenames, Mode=TwoWay}" Margin="0,0,4,0"/>
+            <ToggleButton Content="Data Changed" IsChecked="{Binding FilterDataChanged, Mode=TwoWay}" Margin="0,0,4,0"/>
+            <ToggleButton Content="Close" IsChecked="{Binding FilterClose, Mode=TwoWay}" Margin="0,0,0,0"/>
+        </StackPanel>
+
+        <!-- Modern Search Bars -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8"
+                    IsEnabled="{Binding IsNotLoading}">
+            <!-- Timestamp TextBox -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" 
+                           Foreground="White"/>
+                <Grid Width="210">
+                    <TextBox x:Name="TimestampTextBox"
+                             Text="{Binding TimestampFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             SpellCheck.IsEnabled="False"
+                             TextWrapping="NoWrap"
+                             controls:TimestampMask.IsEnabled="True"
+                             Height="30"/>
+                    
+                    <!-- Placeholder overlay for Timestamp -->
+                    <TextBlock Text="Timestamp"
+                               Foreground="Gray"
+                               FontFamily="Consolas"
+                               Padding="9,0,0,0"
+                               IsHitTestVisible="False"
+                               VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=TimestampTextBox, Path=Text}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+            
+            <!-- Path TextBox -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" 
+                           Foreground="White"/>
+                <Grid Width="210">
+                    <TextBox x:Name="PathTextBox"
+                             Text="{Binding PathFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             SpellCheck.IsEnabled="False"
+                             TextWrapping="NoWrap"
+                             Height="30"/>
+                    
+                    <!-- Placeholder overlay for Path -->
+                    <TextBlock Text="Path"
+                               Foreground="Gray"
+                               FontFamily="Consolas"
+                               Padding="9,0,0,0"
+                               IsHitTestVisible="False"
+                               VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=PathTextBox, Path=Text}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+            
+            <!-- Extension TextBox -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center" Margin="0,0,8,0" 
+                           Foreground="White"/>
+                <Grid Width="210">
+                    <TextBox x:Name="ExtTextBox"
+                             Text="{Binding ExtensionFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             SpellCheck.IsEnabled="False"
+                             TextWrapping="NoWrap"
+                             Height="30"/>
+                    
+                    <!-- Placeholder overlay for Extension -->
+                    <TextBlock Text="Extension"
+                               Foreground="Gray"
+                               FontFamily="Consolas"
+                               Padding="9,0,0,0"
+                               IsHitTestVisible="False"
+                               VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ExtTextBox, Path=Text}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- DataGrid with black background -->
+        <Grid Grid.Row="2">
+            <DataGrid x:Name="JournalDataGrid"
+                      Style="{StaticResource VortexDataGridStyle}"
+                      ItemsSource="{Binding UsnEntries}"
+                      RowBackground="#000000"
+                      AlternatingRowBackground="#0a0a0a"
+                      Height="566"
+                      Width="1360"
+                      Margin="0,0,0,0"
+                      ContextMenuOpening="JournalDataGrid_ContextMenuOpening">
+
+                <DataGrid.ContextMenu>
+                    <ContextMenu x:Name="JournalContextMenu" Style="{StaticResource VortexDataGridContextMenuStyle}">
+                        <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
+                        <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                        <MenuItem x:Name="GoToMenuItem" Header="Go To" Click="GoTo_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="145"
+                        Binding="{Binding Timestamp}"
+                        Header="Timestamp" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding FullPath}"
+                        Header="Path" />
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding ReasonString}"
+                        Header="Reason" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- Bottom row: Info and pagination -->
+        <Grid Grid.Row="3" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Show Info" Command="{Binding ShowInfoCommand}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <TextBlock VerticalAlignment="Center" FontWeight="Bold" 
+                           Foreground="White">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0}/{1} Entries">
+                            <Binding Path="FilteredEntriesCount"/>
+                            <Binding Path="TotalEntries"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0"
+                        IsEnabled="{Binding IsNotLoading}">
+                <CheckBox Content="Reduce Duplicates"
+                          IsChecked="{Binding ReduceDuplicates, Mode=TwoWay}"
+                          Foreground="White"/>
+                <CheckBox Content="Filter Spamlogs" IsChecked="{Binding FilterSpamlogs, Mode=TwoWay}" Margin="10,0,0,0"/>
+            </StackPanel>
+
+            <Grid Grid.Column="2"/>
+
+            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        IsEnabled="{Binding IsNotLoading}">
+                <Button Content="First" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="Go to first page" FontSize="11"/>
+                <Button Content="&lt;&lt;" Command="{Binding Prev5PagesCommand}" Margin="0,0,2,0" 
+                        ToolTip="Previous 5 pages" FontSize="11"/>
+                <Button Content="&lt;" Command="{Binding PrevPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="Previous page" FontSize="11"/>
+                <TextBlock VerticalAlignment="Center" Margin="4,0,4,0" FontSize="11" 
+                           Foreground="White">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0} / {1}">
+                            <Binding Path="CurrentPage"/>
+                            <Binding Path="TotalPages"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <Button Content="&gt;" Command="{Binding NextPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="Next page" FontSize="11"/>
+                <Button Content="&gt;&gt;" Command="{Binding Next5PagesCommand}" Margin="2,0,0,0" 
+                        ToolTip="Next 5 pages" FontSize="11"/>
+                <Button Content="Last" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="Go to last page" FontSize="11"/>
+            </StackPanel>
+
+        </Grid>
+    </Grid>
+    </Border>
+</Page>

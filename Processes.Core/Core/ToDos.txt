@@ -1,0 +1,23 @@
+﻿# Add Entropy Base Filtering like bstrings!
+# Check this and add this detection for deleted BAM keys:
+
+Detecting Cleared BAM
+The BAM (Background Activity Moderator) registry key sometimes gets cleared by attackers to hide persistence.
+You can still detect traces using bstrings:
+
+🔹 Step 1: Download
+Grab bstrings.exe from Eric Zimmerman’s GitHub or via the EZ Tools package.
+
+🔹 Step 2: Run Command
+bstrings.exe -f "C:\Windows\system32\config\SYSTEM" --ls harddiskvolume
+
+bstrings.exe -f "C:\Windows\system32\config\SYSTEM" --ls harddiskvolume -o .\Output.txt
+
+(use second one If you want it to output to text file)
+
+# Add "Analyse Executable Strings"
+# >> Will parse multiple traces of processes at once, like explorer, diagtrack, etc...
+# >> Checks them against the Journal if deleted or not
+# Parse PCASVC 
+# >> Parses Trace and PCASVC 
+# Add Analyse... whatever

@@ -1,0 +1,442 @@
+<Page x:Class="Vortex.UI.Views.TimelineView"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+  xmlns:local="clr-namespace:Vortex.UI.Views"
+  xmlns:viewModels="clr-namespace:Vortex.UI.ViewModels"
+  xmlns:controls="clr-namespace:Vortex.UI.Controls"
+  xmlns:converters="clr-namespace:Vortex.UI.Converters"
+  mc:Ignorable="d" 
+  d:DesignHeight="650" d:DesignWidth="800"
+  Title="Timeline"
+  Background="Transparent">
+<Page.Resources>
+        <!-- ComboBox style with complete black background control template (from ProcessesView) -->
+        <Style x:Key="BlackComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Editable TextBox -->
+                            <TextBox x:Name="PART_EditableTextBox"
+                                     Grid.Column="0"
+                                     Background="#000000"
+                                     Foreground="White"
+                                     BorderBrush="#333333"
+                                     BorderThickness="1,1,0,1"
+                                     Padding="4,3"
+                                     IsReadOnly="{TemplateBinding IsReadOnly}"
+                                     CaretBrush="White"
+                                     Text="{Binding Path=Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsEditable, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                            
+                            <!-- Toggle Button -->
+                            <ToggleButton Grid.Column="1"
+                                          Background="#000000"
+                                          BorderBrush="#333333"
+                                          BorderThickness="1"
+                                          Width="20"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}">
+                                            <Path x:Name="Arrow"
+                                                  Data="M 0 0 L 4 4 L 8 0 Z"
+                                                  Fill="White"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#1a1a1a"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            
+                            <!-- Popup -->
+                            <Popup x:Name="PART_Popup"
+                                   PlacementTarget="{Binding ElementName=PART_EditableTextBox}"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Border Background="#000000"
+                                        BorderBrush="#333333"
+                                        BorderThickness="1"
+                                        MaxHeight="400"
+                                        MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ScrollViewer>
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- ComboBox dropdown background style -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1a1a1a"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#2a2a2a"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- DataGridRow Style with hover effect -->
+        <Style x:Key="ColoredDataGridRowStyle" TargetType="{x:Type DataGridRow}">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1A1A1A"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#2A2A2A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- DataGridCell Style with dynamic foreground color and vertical centering -->
+        <Style x:Key="ColoredDataGridCellStyle" TargetType="{x:Type DataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="Transparent"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource RowForegroundConverter}">
+                        <Binding Path="DataContext.ColoredResults" RelativeSource="{RelativeSource AncestorType=Page}"/>
+                        <Binding Path="Modified"/>
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+    <Border Background="#000000" CornerRadius="0,0,8,8">
+        <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toggle buttons row (centered, below filters) -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+            <ToggleButton Content="Show Deleted" 
+                     IsChecked="{Binding ShowOnlyDeleted, Mode=TwoWay}"
+                     Margin="0,0,4,0"/>
+            <ToggleButton Content="Show only Unknown" 
+                     IsChecked="{Binding ShowOnlyUnknown, Mode=TwoWay}"
+                     Margin="0,0,4,0"/>
+            <ToggleButton Content="Show only Exe" 
+                     IsChecked="{Binding ShowOnlyExe, Mode=TwoWay}"
+                     Margin="0,0,4,0"/>
+            <ToggleButton Content="Show only WinPaths" 
+                     IsChecked="{Binding ShowOnlyWinPaths, Mode=TwoWay}"
+                     Margin="0,0,4,0"/>
+            <ToggleButton Content="Colored Results" 
+                     IsChecked="{Binding ColoredResults, Mode=TwoWay}"
+                     Margin="0,0,0,0"/>
+        </StackPanel> 
+        
+        <!-- Filter Row (centered, matching Journal) -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+            <!-- Timestamp Search TextBox -->
+            <Grid Width="210" Margin="0,0,16,0">
+                <TextBox x:Name="TimestampFilter"
+                         Text="{Binding TimestampFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         SpellCheck.IsEnabled="False"
+                         TextWrapping="NoWrap"
+                         Height="30"/>
+                
+                <!-- Placeholder overlay for Timestamp -->
+                <TextBlock Text="Timestamp"
+                           Foreground="Gray"
+                           FontFamily="Consolas"
+                           Padding="9,0,0,0"
+                           IsHitTestVisible="False"
+                           VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=TimestampFilter, Path=Text}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
+            <!-- Description Multi-Select ComboBox -->
+            <Grid Width="210" Margin="0,0,16,0">
+                <ComboBox x:Name="DescriptionFilter"
+                          IsEditable="True"
+                          IsReadOnly="True"
+                          Text="{Binding DescriptionFilterText, Mode=TwoWay}"
+                          ItemsSource="{Binding AvailableDescriptions}"
+                          DropDownOpened="DescriptionFilter_DropDownOpened"
+                          DropDownClosed="DescriptionFilter_DropDownClosed"
+                          SelectionChanged="DescriptionFilter_SelectionChanged"
+                          Style="{StaticResource BlackComboBoxStyle}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Description}" 
+                                      IsChecked="{Binding IsSelected}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                
+                <!-- Placeholder overlay for Description -->
+                <TextBlock Text="Filter by Description..."
+                           Foreground="Gray"
+                           FontFamily="Consolas"
+                           Padding="7,0,0,0"
+                           IsHitTestVisible="False"
+                           VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=DescriptionFilter, Path=Text}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
+            <!-- Path Search TextBox -->
+            <Grid Width="210" Margin="0,0,16,0">
+                <TextBox x:Name="PathFilter"
+                         Text="{Binding PathFilterText, UpdateSourceTrigger=PropertyChanged}"
+                         SpellCheck.IsEnabled="False"
+                         TextWrapping="NoWrap"
+                         Height="30"/>
+                
+                <!-- Placeholder overlay for Path -->
+                <TextBlock Text="Path"
+                           Foreground="Gray"
+                           FontFamily="Consolas"
+                           Padding="9,0,0,0"
+                           IsHitTestVisible="False"
+                           VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=PathFilter, Path=Text}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
+            <!-- Source Multi-Select ComboBox -->
+            <Grid Width="210">
+                <ComboBox x:Name="SourceFilter"
+                          IsEditable="True"
+                          IsReadOnly="True"
+                          Text="{Binding SourceFilterText, Mode=TwoWay}"
+                          ItemsSource="{Binding AvailableSources}"
+                          DropDownOpened="SourceFilter_DropDownOpened"
+                          DropDownClosed="SourceFilter_DropDownClosed"
+                          SelectionChanged="SourceFilter_SelectionChanged"
+                          Style="{StaticResource BlackComboBoxStyle}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Source}" 
+                                      IsChecked="{Binding IsSelected}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                
+                <!-- Placeholder overlay for Source -->
+                <TextBlock Text="Filter by Source..."
+                           Foreground="Gray"
+                           FontFamily="Consolas"
+                           Padding="7,0,0,0"
+                           IsHitTestVisible="False"
+                           VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=SourceFilter, Path=Text}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </StackPanel>
+
+        <!-- DataGrid -->
+        <Grid Grid.Row="2">
+            <DataGrid ItemsSource="{Binding FilteredRegistryEntries}"
+                      Style="{StaticResource VortexDataGridStyle}"
+                      RowStyle="{StaticResource ColoredDataGridRowStyle}"
+                      CellStyle="{StaticResource ColoredDataGridCellStyle}"
+                      AlternationCount="2"
+                      CanUserSortColumns="True"
+                      HorizontalScrollBarVisibility="Disabled"
+                      RowHeight="27"
+                      Height="566"
+                      Width="1360"
+                      Margin="0,0,0,8"
+                      x:Name="TimelineDataGrid"
+                      ContextMenuOpening="TimelineDataGrid_ContextMenuOpening">
+                <DataGrid.ContextMenu>
+                    <ContextMenu x:Name="TimelineContextMenu" Style="{StaticResource VortexDataGridContextMenuStyle}">
+                        <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
+                        <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                        <MenuItem x:Name="GoToMenuItem" Header="Go To" Click="GoTo_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat='yyyy-MM-dd HH:mm:ss'}" Width="145"/>
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="150"/>
+                    <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*"/>
+                    <DataGridTextColumn Header="Modified" Binding="{Binding Modified}" Width="90"/>
+                    <DataGridTextColumn Header="Signed" Binding="{Binding Signed}" Width="90"/>
+                    <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- Bottom row: Info and pagination (matching Journal) -->
+        <Grid Grid.Row="3" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left side: Entry count, checkboxes, and info button -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Show Parse Info" 
+                        Command="{Binding ShowParseInfoCommand}"
+                        VerticalAlignment="Center"
+                        FontSize="11"
+                        ToolTip="Show entry counts per source (useful for detecting data manipulation)"/>
+                <TextBlock VerticalAlignment="Center" FontWeight="Bold" 
+                           Foreground="White"
+                           Margin="8,0,0,0">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0}/{1} Entries">
+                            <Binding Path="FilteredEntriesCount"/>
+                            <Binding Path="TotalEntries"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <CheckBox Content="Remove Duplicates" 
+                          IsChecked="{Binding RemoveDuplicates, Mode=TwoWay}"
+                          VerticalAlignment="Center"
+                          Foreground="White"
+                          Margin="16,0,0,0"
+                          ToolTip="Filter out duplicate entries with same Timestamp and Path (Other Info is ignored)"/>
+                <CheckBox Content="Hide System32 Logs" 
+                          IsChecked="{Binding HideSystem32Logs, Mode=TwoWay}"
+                          VerticalAlignment="Center"
+                          Foreground="White"
+                          Margin="16,0,0,0"
+                          ToolTip="Hide all files from C:\Windows\System32\"/>
+            </StackPanel>
+
+            <!-- Spacer -->
+            <Grid Grid.Column="1"/>
+
+            <!-- Right side: Pagination controls -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="First" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="Go to first page" FontSize="11"/>
+                <Button Content="&lt;&lt;" Command="{Binding Prev5PagesCommand}" Margin="0,0,2,0" 
+                        ToolTip="Previous 5 pages" FontSize="11"/>
+                <Button Content="&lt;" Command="{Binding PrevPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="Previous page" FontSize="11"/>
+                <TextBlock VerticalAlignment="Center" Margin="4,0,4,0" FontSize="11" 
+                           Foreground="White">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0} / {1}">
+                            <Binding Path="CurrentPage"/>
+                            <Binding Path="TotalPages"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <Button Content="&gt;" Command="{Binding NextPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="Next page" FontSize="11"/>
+                <Button Content="&gt;&gt;" Command="{Binding Next5PagesCommand}" Margin="2,0,0,0" 
+                        ToolTip="Next 5 pages" FontSize="11"/>
+                <Button Content="Last" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="Go to last page" FontSize="11"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+    </Border>
+</Page>

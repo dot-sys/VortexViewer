@@ -1,0 +1,429 @@
+﻿<Window x:Class="Vortex.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Vortex.UI.ViewModels"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        Title="Vortex"
+        Height="800"
+        Width="1400"
+        Background="Transparent"
+        FontFamily="Consolas"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        RenderOptions.EdgeMode="Aliased">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome 
+            CaptionHeight="0"
+            ResizeBorderThickness="0"
+            GlassFrameThickness="0"
+            CornerRadius="0"
+            UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <!-- Navigation Button Styles -->
+        <Style x:Key="DashboardButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Width" Value="35"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Width="{TemplateBinding Width}" 
+                                Height="{TemplateBinding Height}">
+                            <ContentPresenter x:Name="ContentPresenter" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ContentPresenter" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="NavigationButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Width="{TemplateBinding Width}" 
+                                Height="{TemplateBinding Height}">
+                            <ContentPresenter x:Name="ContentPresenter" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1A1A1A"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ContentPresenter" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom Title Bar Button Style -->
+        <Style x:Key="TitleBarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1f1f1f"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Refresh Button Style (with rotation animation) -->
+        <Style x:Key="RefreshButtonStyle" TargetType="Button" BasedOn="{StaticResource TitleBarButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="MainBorder" Background="{TemplateBinding Background}">
+                            <Image x:Name="RefreshImage" 
+                                   Source="/Assets/refresh.png" 
+                                   Width="12" 
+                                   Height="12"
+                                   RenderTransformOrigin="0.5,0.5"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   RenderOptions.EdgeMode="Aliased"
+                                   >
+                                <Image.RenderTransform>
+                                    <RotateTransform x:Name="RefreshRotation" Angle="0"/>
+                                </Image.RenderTransform>
+                            </Image>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="MainBorder" Property="Background" Value="#1f1f1f"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="RefreshRotation"
+                                                           Storyboard.TargetProperty="Angle"
+                                                           To="270"
+                                                           Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="RefreshRotation"
+                                                           Storyboard.TargetProperty="Angle"
+                                                           To="0"
+                                                           Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Minimize Button Style (with left and right borders) -->
+        <Style x:Key="MinimizeButtonStyle" TargetType="Button" BasedOn="{StaticResource TitleBarButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="MainBorder" Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border BorderBrush="White" BorderThickness="0.6,0,0,0" IsHitTestVisible="False"/>
+                            <Border BorderBrush="#454545" BorderThickness="0,0,0.6,0" IsHitTestVisible="False"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="MainBorder" Property="Background" Value="#1f1f1f"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Close Button Style (Red on hover) -->
+        <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource TitleBarButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="CloseBorder" Background="{TemplateBinding Background}" CornerRadius="0,8,0,0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#780505"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Maximize Button Style -->
+        <Style x:Key="MaximizeButtonStyle" TargetType="Button" BasedOn="{StaticResource TitleBarButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#242424"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Window.DataContext>
+        <vm:MainWindowViewModel/>
+    </Window.DataContext>
+
+    <!-- Main visual content with rounded border -->
+    <Border
+        CornerRadius="8"
+        Background="#000000"
+        BorderBrush="White"
+        BorderThickness="1"
+        ClipToBounds="True"
+        SnapsToDevicePixels="True"
+        RenderOptions.EdgeMode="Aliased">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Custom Title Bar with white border -->
+            <Border Grid.Row="0" 
+                    Background="#000000" 
+                    BorderBrush="White" 
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="8,8,0,0"
+                    Height="25"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
+                    RenderOptions.EdgeMode="Aliased">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Window Control Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Style="{StaticResource RefreshButtonStyle}"
+                                Click="Refresh_Click"
+                                ToolTip="Refresh"/>
+                        <Button Content="_" 
+                                Style="{StaticResource MinimizeButtonStyle}"
+                                Click="Minimize_Click"
+                                ToolTip="Minimize"/>
+                        <Button x:Name="CloseButton"
+                                Content="✕" 
+                                Style="{StaticResource CloseButtonStyle}"
+                                Click="Close_Click"
+                                ToolTip="Close"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Main Content Area -->
+            <Grid Grid.Row="1">
+                <!-- Main Content Frame with rounded bottom corners -->
+                <Border CornerRadius="0,0,8,8" 
+                        Margin="0,50,0,0"
+                        Background="Transparent"
+                        ClipToBounds="True">
+                    <Frame x:Name="MainFrame" 
+                           NavigationUIVisibility="Hidden"
+                           Background="Transparent"
+                           Navigated="MainFrame_Navigated"/>
+                </Border>
+
+                <!-- OVERLAY: Navigation on top of everything -->
+                <Grid Panel.ZIndex="1000">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="65"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Logo with white border (bottom half only) -->
+                    <Grid Width="52" Height="52" 
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Top"
+                          Margin="0,-27,0,0" 
+                          Grid.Row="0"
+                          ClipToBounds="False">
+                        <!-- Full circle background -->
+                        <Ellipse Width="52" Height="52" 
+                                 Fill="#000000"
+                                 RenderOptions.EdgeMode="Aliased"/>
+                        <!-- Bottom half border - semicircle arc -->
+                        <Path Data="M 0,26 A 26,26 0 0 0 52,26" 
+                              Stroke="White" 
+                              StrokeThickness="1" 
+                              Fill="Transparent"
+                              Stretch="None"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              SnapsToDevicePixels="True"
+                              RenderOptions.EdgeMode="Aliased"/>
+                        <!-- Logo image -->
+                        <Image Source="/Assets/VortexWhiteLogo40.png" 
+                               Width="35" Height="35" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"
+                               RenderOptions.EdgeMode="Aliased"/>
+                    </Grid>
+
+                    <!-- Left Navigation Buttons -->
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Top"
+                                Margin="0,-10,320,0"
+                                Grid.Row="0">
+
+                        <!-- Dashboard Button (full bottom + partial sides with rounded corners) -->
+                        <Grid Width="35" Height="30" Margin="0,0,10,0">
+                            <Button Command="{Binding NavigateToDashboardCommand}"
+                                    IsEnabled="{Binding CanNavigateToDashboard}"
+                                    Style="{StaticResource DashboardButtonStyle}"
+                                    BorderThickness="0">
+                                <Image Source="/Assets/Mag_White.png" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Aliased"/>
+                            </Button>
+                            <!-- Bottom border with rounded corners -->
+                            <Border BorderBrush="White" 
+                                    BorderThickness="1,0,1,1" 
+                                    CornerRadius="0,0,5,5"
+                                    Height="21"
+                                    VerticalAlignment="Bottom"
+                                    IsHitTestVisible="False"
+                                    SnapsToDevicePixels="True"
+                                    RenderOptions.EdgeMode="Aliased"/>
+                        </Grid>
+
+                        <!-- Journal Button (full bottom + partial sides with rounded corners) -->
+                        <Grid Width="100" Height="30" Margin="0,0,5,0">
+                            <Button Content="Journal" 
+                                  Command="{Binding NavigateToJournalCommand}"
+                                  IsEnabled="{Binding CanNavigateToJournal}"
+                                  Style="{StaticResource NavigationButtonStyle}"
+                                  BorderThickness="0"/>
+                            <!-- Bottom border with rounded corners -->
+                            <Border BorderBrush="White" 
+                                    BorderThickness="1,0,1,1" 
+                                    CornerRadius="0,0,5,5"
+                                    Height="21"
+                                    VerticalAlignment="Bottom"
+                                    IsHitTestVisible="False"
+                                    RenderOptions.EdgeMode="Aliased"/>
+                        </Grid>
+
+                        <!-- Processes Button (full bottom + partial sides with rounded corners) -->
+                        <Grid Width="100" Height="30">
+                            <Button Content="Processes" 
+                                  Command="{Binding NavigateToProcessesCommand}"
+                                  IsEnabled="{Binding CanNavigateToProcesses}"
+                                  Style="{StaticResource NavigationButtonStyle}"
+                                  BorderThickness="0"/>
+                            <!-- Bottom border with rounded corners -->
+                            <Border BorderBrush="White" 
+                                    BorderThickness="1,0,1,1" 
+                                    CornerRadius="0,0,5,5"
+                                    Height="21"
+                                    VerticalAlignment="Bottom"
+                                    IsHitTestVisible="False"
+                                    RenderOptions.EdgeMode="Aliased"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Right Navigation Buttons -->
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Top"
+                                Margin="275,-10,0,0"
+                                Grid.Row="0">
+                        <!-- Timeline Button (full bottom + partial sides with rounded corners) -->
+                        <Grid Width="100" Height="30" Margin="0,0,5,0">
+                            <Button Content="Timeline" 
+                                  Command="{Binding NavigateToTimelineCommand}"
+                                  IsEnabled="{Binding CanNavigateToTimeline}"
+                                  Style="{StaticResource NavigationButtonStyle}"
+                                  BorderThickness="0"/>
+                            <!-- Bottom border with rounded corners -->
+                            <Border BorderBrush="White" 
+                                    BorderThickness="1,0,1,1" 
+                                    CornerRadius="0,0,5,5"
+                                    Height="21"
+                                    VerticalAlignment="Bottom"
+                                    IsHitTestVisible="False"
+                                    RenderOptions.EdgeMode="Aliased"/>
+                        </Grid>
+
+                        <!-- Drives Button (full bottom + partial sides with rounded corners) -->
+                        <Grid Width="100" Height="30" Margin="2.5,0,0,0">
+                            <Button Content="Drives" 
+                                  Command="{Binding NavigateToDrivesCommand}"
+                                  IsEnabled="{Binding CanNavigateToDrives}"
+                                  Style="{StaticResource NavigationButtonStyle}"
+                                  BorderThickness="0"/>
+                            <!-- Bottom border with rounded corners -->
+                            <Border BorderBrush="White" 
+                                    BorderThickness="1,0,1,1" 
+                                    CornerRadius="0,0,5,5"
+                                    Height="21"
+                                    VerticalAlignment="Bottom"
+                                    IsHitTestVisible="False"
+                                    RenderOptions.EdgeMode="Aliased"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

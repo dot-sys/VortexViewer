@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\WmiLight.6.10.0\build\WmiLight.props" Condition="Exists('..\packages\WmiLight.6.10.0\build\WmiLight.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{53C4FB3F-8417-4737-BF87-784F36F8C0E7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Timeline.Core</RootNamespace>
+    <AssemblyName>Timeline.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AlphaFS, Version=2.3.0.0, Culture=neutral, PublicKeyToken=4d31a58f7d7ad5c9, processorArchitecture=MSIL">
+      <HintPath>..\packages\AlphaFS.New.2.3.0\lib\net46\AlphaFS.dll</HintPath>
+    </Reference>
+    <Reference Include="Amcache, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Amcache.1.3.1\lib\netstandard2.0\Amcache.dll</HintPath>
+    </Reference>
+    <Reference Include="AppCompatCache, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AppCompatCache.1.2.4\lib\netstandard2.0\AppCompatCache.dll</HintPath>
+    </Reference>
+    <Reference Include="CsvHelper, Version=33.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
+      <HintPath>..\packages\CsvHelper.33.1.0\lib\net462\CsvHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="DeviceIOControlLib, Version=0.1.6.0, Culture=neutral, PublicKeyToken=194e86a1dcd77098, processorArchitecture=MSIL">
+      <HintPath>..\packages\DeviceIOControlLib.0.1.6\lib\net40\DeviceIOControlLib.dll</HintPath>
+    </Reference>
+    <Reference Include="DiscUtils.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LTRData.DiscUtils.Core.1.0.49\lib\net46\DiscUtils.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DiscUtils.Ntfs, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LTRData.DiscUtils.Ntfs.1.0.49\lib\net46\DiscUtils.Ntfs.dll</HintPath>
+    </Reference>
+    <Reference Include="DiscUtils.Streams, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LTRData.DiscUtils.Streams.1.0.49\lib\net46\DiscUtils.Streams.dll</HintPath>
+    </Reference>
+    <Reference Include="ERZHelpers, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ERZHelpers.1.5.2\lib\netstandard2.0\ERZHelpers.dll</HintPath>
+    </Reference>
+    <Reference Include="ExtensionBlocks, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExtensionBlocks.1.4.2\lib\netstandard2.0\ExtensionBlocks.dll</HintPath>
+    </Reference>
+    <Reference Include="GuidMapping, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GuidMapping.1.3.0\lib\netstandard2.0\GuidMapping.dll</HintPath>
+    </Reference>
+    <Reference Include="iNKORE.UI.WPF, Version=1.2.8.0, Culture=neutral, PublicKeyToken=cd19e634b9706635, processorArchitecture=MSIL">
+      <HintPath>..\packages\iNKORE.UI.WPF.Modern.0.10.1\lib\net452\iNKORE.UI.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="iNKORE.UI.WPF.Modern, Version=0.10.1.0, Culture=neutral, PublicKeyToken=cd19e634b9706635, processorArchitecture=MSIL">
+      <HintPath>..\packages\iNKORE.UI.WPF.Modern.0.10.1\lib\net452\iNKORE.UI.WPF.Modern.dll</HintPath>
+    </Reference>
+    <Reference Include="iNKORE.UI.WPF.Modern.Controls, Version=0.10.1.0, Culture=neutral, PublicKeyToken=cd19e634b9706635, processorArchitecture=MSIL">
+      <HintPath>..\packages\iNKORE.UI.WPF.Modern.0.10.1\lib\net452\iNKORE.UI.WPF.Modern.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="Kaitai.Struct.Runtime, Version=0.11.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\KaitaiStruct.Runtime.CSharp.0.11.0\lib\netstandard2.0\Kaitai.Struct.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Lnk, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lnk.1.5.1\lib\netstandard2.0\Lnk.dll</HintPath>
+    </Reference>
+    <Reference Include="LTRData.Extensions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LTRData.Extensions.1.0.11\lib\net46\LTRData.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.HashCode, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.HashCode.1.1.1\lib\net461\Microsoft.Bcl.HashCode.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="NFluent, Version=3.1.0.0, Culture=neutral, PublicKeyToken=18828b37b84b1437, processorArchitecture=MSIL">
+      <HintPath>..\packages\NFluent.3.1.0\lib\net462\NFluent.dll</HintPath>
+    </Reference>
+    <Reference Include="Prefetch, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Prefetch.1.3.0\lib\netstandard2.0\Prefetch.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="RawDiskLib, Version=0.2.1.0, Culture=neutral, PublicKeyToken=1e91a7ce501218a4, processorArchitecture=MSIL">
+      <HintPath>..\packages\RawDiskLib.0.2.1\lib\net40\RawDiskLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Registry, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Registry.1.5.1\lib\netstandard2.0\Registry.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog, Version=4.3.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.4.3.0\lib\net462\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=8.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.8.0.1\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Management" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Algorithms, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net461\System.Security.Cryptography.Algorithms.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Encoding, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Encoding.4.3.0\lib\net46\System.Security.Cryptography.Encoding.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encoding.CodePages, Version=9.0.0.5, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encoding.CodePages.9.0.5\lib\net462\System.Text.Encoding.CodePages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Channels, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Channels.8.0.0\lib\net462\System.Threading.Channels.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\iNKORE.UI.WPF.Modern.0.10.1\lib\net452\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WmiLight, Version=6.10.0.0, Culture=neutral, PublicKeyToken=cf32ce69bdbe2391, processorArchitecture=MSIL">
+      <HintPath>..\packages\WmiLight.6.10.0\lib\netstandard2.0\WmiLight.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\RegistryExtractor.cs" />
+    <Compile Include="Models\ExtractionResult.cs" />
+    <Compile Include="Models\RegistryEntry.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Parsers\\AmcacheParser.cs" />
+    <Compile Include="Parsers\\BAMParser.cs" />
+    <Compile Include="Util\CopyHives.cs" />
+    <Compile Include="Parsers\\DetectionHistoryParser.cs" />
+    <Compile Include="Core\EvidenceAggregator.cs" />
+    <Compile Include="Util\DevicePathMapper.cs" />
+    <Compile Include="Parsers\\EventLogParser.cs" />
+    <Compile Include="Util\FileStatusDetector.cs" />
+    <Compile Include="Parsers\\GenericParser.cs" />
+    <Compile Include="Util\HiveFinder.cs" />
+    <Compile Include="Util\PathCleaner.cs" />
+    <Compile Include="Parsers\\PCAParser.cs" />
+    <Compile Include="Parsers\\PrefetchParser.cs" />
+    <Compile Include="Parsers\\RecentItemsParser.cs" />
+    <Compile Include="Util\ShellBagMetadataExtractor.cs" />
+    <Compile Include="Parsers\\ShellbagParser.cs" />
+    <Compile Include="Parsers\\ShimcacheParser.cs" />
+    <Compile Include="Util\StatusCheck.cs" />
+    <Compile Include="Util\StringPool.cs" />
+    <Compile Include="Util\VolumeSerialNumberMapper.cs" />
+    <Compile Include="Parsers\\WERParser.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\AlphaVSS.Native.NetFx.2.0.3\build\net45\AlphaVSS.Native.NetFx.targets" Condition="Exists('..\packages\AlphaVSS.Native.NetFx.2.0.3\build\net45\AlphaVSS.Native.NetFx.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\AlphaVSS.Native.NetFx.2.0.3\build\net45\AlphaVSS.Native.NetFx.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AlphaVSS.Native.NetFx.2.0.3\build\net45\AlphaVSS.Native.NetFx.targets'))" />
+    <Error Condition="!Exists('..\packages\WmiLight.6.10.0\build\WmiLight.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WmiLight.6.10.0\build\WmiLight.props'))" />
+    <Error Condition="!Exists('..\packages\WmiLight.6.10.0\build\WmiLight.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WmiLight.6.10.0\build\WmiLight.targets'))" />
+    <Error Condition="!Exists('..\packages\Serilog.4.3.0\build\Serilog.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Serilog.4.3.0\build\Serilog.targets'))" />
+  </Target>
+  <Import Project="..\packages\WmiLight.6.10.0\build\WmiLight.targets" Condition="Exists('..\packages\WmiLight.6.10.0\build\WmiLight.targets')" />
+  <Import Project="..\packages\Serilog.4.3.0\build\Serilog.targets" Condition="Exists('..\packages\Serilog.4.3.0\build\Serilog.targets')" />
+</Project>

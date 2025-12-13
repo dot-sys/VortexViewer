@@ -1,0 +1,117 @@
+<Window x:Class="Vortex.UI.Views.InfoPopupWindow"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+WindowStyle="None"
+AllowsTransparency="True"
+ResizeMode="NoResize"
+Title="Info"
+SizeToContent="WidthAndHeight"
+MaxHeight="800"
+MaxWidth="1400"
+MinHeight="200"
+MinWidth="600"
+Background="Transparent"
+FontFamily="Consolas"
+WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <!-- Close Button Style -->
+        <Style x:Key="CloseButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Width="{TemplateBinding Width}" 
+                                Height="{TemplateBinding Height}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#780505"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Main visual content with rounded border -->
+    <Border
+        CornerRadius="8"
+        Background="#000000"
+        BorderBrush="White"
+        BorderThickness="1"
+        ClipToBounds="True">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title Bar for Dragging -->
+            <Border Grid.Row="0"
+                    Background="#1A1A1A"
+                    BorderBrush="#333333"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="8,8,0,0"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
+                    Cursor="SizeAll">
+                <TextBlock x:Name="TitleTextBlock"
+                           Text="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Title}"
+                           Foreground="White"
+                           FontFamily="Consolas"
+                           FontSize="12"
+                           FontWeight="Bold"
+                           Margin="10,5"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Border>
+
+            <!-- Main Content Area with Info Icon -->
+            <Grid Grid.Row="1" Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Info Icon (large lowercase i) -->
+                <Viewbox Grid.Column="0" Width="60" Height="60" 
+                         Margin="0,0,15,0" 
+                         VerticalAlignment="Top">
+                    <TextBlock Text="i" 
+                               Foreground="White" 
+                               FontFamily="Consolas"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                </Viewbox>
+                
+                <!-- Content Area -->
+                <ContentPresenter Grid.Column="1" 
+                                  x:Name="ContentPresenter" 
+                                  Content="{Binding}" />
+            </Grid>
+
+            <!-- Bottom Close Button -->
+            <Grid Grid.Row="2" Margin="0,0,0,10">
+                <Button Content="Close" 
+                        Style="{StaticResource CloseButtonStyle}"
+                        Click="Close_Click"
+                        HorizontalAlignment="Center"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
