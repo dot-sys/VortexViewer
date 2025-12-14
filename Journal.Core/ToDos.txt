@@ -1,8 +1,0 @@
-- zeigt immernoch ":\:\" bei vielen an
--- Braucht wahrscheinlich ein Rewind wie bei:
--- https://cybercx.com.au/blog/ntfs-usnjrnl-rewind/
-- Wenn in der selben Sekunde und Millisekunde Renamed From und Renamed To sind, dann Renamed FROM zuerst unten!
--- Das muss irgendwie resourcensenschonend gehen
-- Optimierungen in Performance und Memory ggf noch mal durchgehen, dauerhaft 1GB halten ist too much
-- Die Kommentare komplett anpassen!
-
