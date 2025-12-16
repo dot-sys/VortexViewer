@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) [year] [fullname]
+Copyright (c) 2025 by dot-sys
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,27 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Third Party Licenses
+
+This project uses these (MIT-)licensed libraries:
+
+- AlphaFS: https://github.com/AlphaFS/AlphaFS
+- Amcache by Eric Zimmerman: https://github.com/EricZimmerman/AmcacheParser
+- CsvHelper by Eric Zimmerman: https://github.com/EricZimmerman (integrated)
+- AppCompatCache by Eric Zimmerman: https://github.com/EricZimmerman/AppCompatCacheParser
+- DiscUtils.Core: https://github.com/DiscUtils/DiscUtils
+- DiscUtils.Ntfs: https://github.com/DiscUtils/DiscUtils
+- DiscUtils.Streams: https://github.com/DiscUtils/DiscUtils
+- ErzHelpers by Eric Zimmerman: https://github.com/EricZimmerman/ErzHelpers
+- ExtensionBlocks by Eric Zimmerman: https://github.com/EricZimmerman/ExtensionBlocks
+- GuidMapping by Eric Zimmerman: https://github.com/EricZimmerman/GuidMapping
+- Lnk by Eric Zimmerman: https://github.com/EricZimmerman/Lnk
+- LTRData.Extensions: https://www.nuget.org/packages/LTRData.Extensions
+- Prefetch by Eric Zimmerman: https://github.com/EricZimmerman/Prefetch
+- RawDiskLib: https://github.com/LordMike/RawDiskLib
+- Registry by Eric Zimmerman: https://github.com/EricZimmerman/Registry
+- Serilog: https://github.com/serilog/serilog (BSD-3-Clause, MIT compatible)
+- WmiLight: https://github.com/MartinKuschnik/WmiLight
+
+See each repository for full license text.
