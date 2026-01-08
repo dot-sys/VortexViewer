@@ -60,7 +60,7 @@
             </Image>
             
             <!-- Vortex Viewer Title -->
-            <TextBlock Text="Vortex Viewer"
+            <TextBlock Text="{DynamicResource VortexViewer}"
                        Foreground="White"
                        FontFamily="Consolas"
                        FontSize="24"
@@ -69,7 +69,7 @@
             
             <!-- Start Trace Button -->
             <Button x:Name="StartTraceButton"
-                    Content="Start Trace" 
+                    Content="{DynamicResource StartTrace}" 
                     Style="{StaticResource StartTraceButtonStyle}"
                     Click="StartTrace_Click"
                     HorizontalAlignment="Center"/>

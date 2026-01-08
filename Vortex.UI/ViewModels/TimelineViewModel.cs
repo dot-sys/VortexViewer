@@ -229,6 +229,18 @@ namespace Vortex.UI.ViewModels
             }
         }
 
+        private bool _showOnlyNotSigned;
+        public bool ShowOnlyNotSigned
+        {
+            get => _showOnlyNotSigned;
+            set
+            {
+                _showOnlyNotSigned = value;
+                OnPropertyChanged(nameof(ShowOnlyNotSigned));
+                _ = ApplyFiltersAsync();
+            }
+        }
+
         private bool _removeDuplicates = true;
         public bool RemoveDuplicates
         {
@@ -272,10 +284,7 @@ namespace Vortex.UI.ViewModels
                     System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
                     {
                         var view = CollectionViewSource.GetDefaultView(FilteredRegistryEntries);
-                        if (view != null)
-                        {
-                            view.Refresh();
-                        }
+                        view?.Refresh();
                     }, DispatcherPriority.Background);
                 }
             }
@@ -388,8 +397,6 @@ namespace Vortex.UI.ViewModels
 
                 var sortedEntries = result.Entries.OrderByDescending(e => e.Timestamp).ToList();
 
-                _originalEntries = sortedEntries;
-
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     RegistryEntries.Clear();
@@ -399,6 +406,12 @@ namespace Vortex.UI.ViewModels
                     {
                         RegistryEntries.Add(entry);
                     }
+                    
+                    // Keep sortedEntries as _originalEntries for filtering
+                    _originalEntries = sortedEntries;
+                    
+                    // Clear the result object only
+                    result = null;
                     
                     UpdateFilterOptions();
                     
@@ -490,6 +503,7 @@ namespace Vortex.UI.ViewModels
                 var showOnlyUnknown = ShowOnlyUnknown;
                 var showOnlyExe = ShowOnlyExe;
                 var showOnlyWinPaths = ShowOnlyWinPaths;
+                var showOnlyNotSigned = ShowOnlyNotSigned;
                 var removeDuplicates = RemoveDuplicates;
                 var hideSystem32Logs = HideSystem32Logs;
 
@@ -543,6 +557,10 @@ namespace Vortex.UI.ViewModels
                     if (showOnlyWinPaths)
                         query = query.Where(x => !string.IsNullOrEmpty(x.Path) && 
                             WinPathRegex.IsMatch(x.Path));
+
+                    if (showOnlyNotSigned)
+                        query = query.Where(x => !string.IsNullOrEmpty(x.Signed) && 
+                            x.Signed.Equals("NotSigned", StringComparison.OrdinalIgnoreCase));
 
                     if (hideSystem32Logs)
                         query = query.Where(x => string.IsNullOrEmpty(x.Path) || 
@@ -635,18 +653,13 @@ namespace Vortex.UI.ViewModels
         {
             var allSources = new List<string>
             {
-                "CIT Module",
-                "CIT System",
                 "CompatAssist Persisted",
                 "CompatAssist Store",
-                "JumpListData",
                 "MuiCache",
-                "RADAR HeapLeakDetection",
                 "RecentDocs",
                 "Registry",
                 "Run",
                 "RunMRU",
-                "RunOnce",
                 "TypedPaths",
                 "UserAssist",
                 "WinRAR History",
@@ -656,7 +669,11 @@ namespace Vortex.UI.ViewModels
                 "EventLog",
                 "Prefetch",
                 "ShimCache",
-                "WER"
+                "WER",
+                "Shellbag",
+                "Recent",
+                "PCA",
+                "Detection History"
             };
 
             var sourceCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);

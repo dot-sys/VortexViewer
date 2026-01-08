@@ -15,8 +15,12 @@ namespace Timeline.Core.Util
 
             var systemRoot = Environment.GetFolderPath(Environment.SpecialFolder.System);
 
-            AddHiveIfFound(hives, "SYSTEM", Path.Combine(systemRoot, @"config\SYSTEM"));
-            AddHiveIfFound(hives, "SOFTWARE", Path.Combine(systemRoot, @"config\SOFTWARE"));
+            var systemHivePath = Path.Combine(systemRoot, @"config\SYSTEM");
+            var softwareHivePath = Path.Combine(systemRoot, @"config\SOFTWARE");
+            
+            hives.Add("SYSTEM", systemHivePath);
+            
+            hives.Add("SOFTWARE", softwareHivePath);
             
             var currentUser = Environment.UserName;
             var currentUserProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -31,9 +35,26 @@ namespace Timeline.Core.Util
 
         private static void AddHiveIfFound(Dictionary<string, string> hives, string name, string path)
         {
-            if (File.Exists(path) && !hives.ContainsKey(name))
+            try
             {
-                hives.Add(name, path);
+                var fileInfo = new FileInfo(path);
+                if (fileInfo.Exists)
+                {
+                    if (!hives.ContainsKey(name))
+                    {
+                        hives.Add(name, path);
+                    }
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                if (!hives.ContainsKey(name))
+                {
+                    hives.Add(name, path);
+                }
+            }
+            catch (Exception)
+            {
             }
         }
     }

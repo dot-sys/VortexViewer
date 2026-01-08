@@ -81,7 +81,7 @@ namespace Processes.Core.Util
         /// Scans process memory for trace paths
         private static async Task<List<string>> ExtractPathsFromProcessAsync(
             int processId,
-            string sourceName,
+            string _sourceName,
             CancellationToken cancellationToken)
         {
             var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -117,7 +117,7 @@ namespace Processes.Core.Util
             {
                 throw;
             }
-            catch (Exception ex)
+            catch
             {
             }
 

@@ -51,6 +51,7 @@ namespace VortexViewer.Journal.Core.Util
             uint dwFlagsAndAttributes,
             IntPtr hTemplateFile);
 
+        // DeviceIoControl overload for QUERY operations (no input buffer)
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool DeviceIoControl(
             SafeFileHandle hDevice,
@@ -59,6 +60,18 @@ namespace VortexViewer.Journal.Core.Util
             uint nInBufferSize,
             [Out] byte[] lpOutBuffer,
             uint nOutBufferSize,
+            out uint lpBytesReturned,
+            IntPtr lpOverlapped);
+
+        // DeviceIoControl overload for READ operations (with structured input)
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool DeviceIoControl(
+            SafeFileHandle hDevice,
+            uint dwIoControlCode,
+            ref READ_USN_JOURNAL_DATA lpInBuffer,
+            int nInBufferSize,
+            [Out] byte[] lpOutBuffer,
+            int nOutBufferSize,
             out uint lpBytesReturned,
             IntPtr lpOverlapped);
 
@@ -87,7 +100,6 @@ namespace VortexViewer.Journal.Core.Util
                     return null; // No journal or cannot open
 
                 var outBuffer = new byte[Marshal.SizeOf(typeof(USN_JOURNAL_DATA))];
-                uint bytesReturned;
                 if (!DeviceIoControl(
                     handle,
                     FSCTL_QUERY_USN_JOURNAL,
@@ -95,15 +107,16 @@ namespace VortexViewer.Journal.Core.Util
                     0,
                     outBuffer,
                     (uint)outBuffer.Length,
-                    out bytesReturned,
+                    out uint bytesReturned,
                     IntPtr.Zero))
                     return null; // No journal
 
-                var handle2 = GCHandle.Alloc(outBuffer, GCHandleType.Pinned);
+                // Allocate unmanaged memory and copy the data to avoid RCW race condition
+                IntPtr ptr = Marshal.AllocHGlobal(outBuffer.Length);
                 try
                 {
-                    var data = (USN_JOURNAL_DATA)Marshal.PtrToStructure(
-                        handle2.AddrOfPinnedObject(), typeof(USN_JOURNAL_DATA));
+                    Marshal.Copy(outBuffer, 0, ptr, outBuffer.Length);
+                    var data = (USN_JOURNAL_DATA)Marshal.PtrToStructure(ptr, typeof(USN_JOURNAL_DATA));
                     return new UsnJournalInfo
                     {
                         DriveLetter = driveLetter,
@@ -116,7 +129,7 @@ namespace VortexViewer.Journal.Core.Util
                 }
                 finally
                 {
-                    handle2.Free();
+                    Marshal.FreeHGlobal(ptr);
                 }
             }
         }
@@ -126,28 +139,38 @@ namespace VortexViewer.Journal.Core.Util
             var entries = new List<UsnJournalEntry>(3_000_000);
             var drive = driveLetter.TrimEnd('\\');
             var path = $"\\\\.\\{drive}";
+            
             using (var handle = CreateFile(
                 path,
-                0x80000000 | 0x40000000, // GENERIC_READ | GENERIC_WRITE
-                1 | 2,                   // FILE_SHARE_READ | FILE_SHARE_WRITE
+                0x80000000, // GENERIC_READ only (removed GENERIC_WRITE to avoid Defender blocks)
+                1 | 2,      // FILE_SHARE_READ | FILE_SHARE_WRITE
                 IntPtr.Zero,
-                3,                       // OPEN_EXISTING
+                3,          // OPEN_EXISTING
                 0,
                 IntPtr.Zero))
             {
                 if (handle.IsInvalid)
+                {
                     return entries;
+                }
 
                 var journalInfo = QueryJournal(driveLetter);
                 if (journalInfo == null)
+                {
                     return entries;
+                }
 
                 long startUsn = (long)journalInfo.FirstUsn;
-                long nextUsn = (long)journalInfo.NextUsn;
                 const int bufferSize = 4 * 1024 * 1024;
+                const int minRecordSize = 60; // Minimum USN_RECORD_V2 size
+                var outBuffer = new byte[bufferSize];
+                int maxIterations = 10000; // Safety limit to prevent infinite loops
+                int iteration = 0;
 
-                while (startUsn < nextUsn)
+                while (iteration < maxIterations)
                 {
+                    iteration++;
+                    
                     var inData = new READ_USN_JOURNAL_DATA
                     {
                         StartUsn = startUsn,
@@ -158,47 +181,70 @@ namespace VortexViewer.Journal.Core.Util
                         UsnJournalID = journalInfo.JournalId
                     };
 
-                    int inDataSize = Marshal.SizeOf(typeof(READ_USN_JOURNAL_DATA));
-                    var inBuffer = Marshal.AllocHGlobal(inDataSize);
-                    try
+                    // Use direct structure passing instead of manual allocation
+                    if (!DeviceIoControl(
+                        handle,
+                        FSCTL_READ_USN_JOURNAL,
+                        ref inData,
+                        Marshal.SizeOf(typeof(READ_USN_JOURNAL_DATA)),
+                        outBuffer,
+                        outBuffer.Length,
+                        out uint bytesReturned,
+                        IntPtr.Zero))
                     {
-                        Marshal.StructureToPtr(inData, inBuffer, false);
-                        var outBuffer = new byte[bufferSize];
-                        uint bytesReturned;
-                        if (!DeviceIoControl(
-                            handle,
-                            FSCTL_READ_USN_JOURNAL,
-                            inBuffer,
-                            (uint)inDataSize,
-                            outBuffer,
-                            (uint)outBuffer.Length,
-                            out bytesReturned,
-                            IntPtr.Zero))
-                            break;
-
-                        if (bytesReturned < 8)
-                            break;
-
-                        long lastUsn = BitConverter.ToInt64(outBuffer, 0);
-                        int offset = 8;
-                        while (offset < bytesReturned)
-                        {
-                            var record = UsnJournalEntry.Parse(outBuffer, offset);
-                            entries.Add(record);
-                            offset += record.RecordLength;
-                        }
-
-                        if (lastUsn <= startUsn)
-                            break;
-
-                        startUsn = lastUsn;
+                        break;
                     }
-                    finally
+
+                    if (bytesReturned < 8)
                     {
-                        Marshal.FreeHGlobal(inBuffer);
+                        break;
                     }
+
+                    long lastUsn = BitConverter.ToInt64(outBuffer, 0);
+                    
+                    // If we got the same USN or went backwards, we're done
+                    if (lastUsn == startUsn)
+                    {
+                        break;
+                    }
+
+                    int offset = 8;
+                    int recordsParsed = 0;
+                    
+                    while (offset < bytesReturned)
+                    {
+                        // Need at least 4 bytes for record length
+                        if (offset + 4 > bytesReturned)
+                            break;
+
+                        int recordLength = BitConverter.ToInt32(outBuffer, offset);
+                        
+                        // Validate record length
+                        if (recordLength < minRecordSize || 
+                            recordLength > bufferSize || 
+                            offset + recordLength > bytesReturned)
+                            break;
+
+                        var record = UsnJournalEntry.Parse(outBuffer, offset);
+                        entries.Add(record);
+                        recordsParsed++;
+                        
+                        // USN records are 8-byte aligned
+                        int alignedLength = (recordLength + 7) & ~7;
+                        offset += alignedLength;
+                    }
+
+                    // If we didn't parse any records but got data, something is wrong
+                    if (recordsParsed == 0 && bytesReturned > 8)
+                    {
+                        break;
+                    }
+
+                    // Move to the next USN position
+                    startUsn = lastUsn;
                 }
             }
+            
             return entries;
         }
 

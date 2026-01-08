@@ -18,7 +18,7 @@ namespace Timeline.Core.Parsers
         /// <summary>
         /// Parse Windows Defender Detection History files
         /// </summary>
-        public static List<RegistryEntry> ParseDetectionHistory(Action<string> logger = null)
+        public static List<RegistryEntry> ParseDetectionHistory(Action<string> _ = null)
         {
             var timelineEntries = new List<RegistryEntry>();
             
@@ -51,7 +51,9 @@ namespace Timeline.Core.Parsers
                                 byte[] fileBytes = File.ReadAllBytes(detectionFile);
                                 
                                 if (fileBytes.Length < 100)
+                                {
                                     continue;
+                                }
 
                                 string detectionPath = ExtractFilePath(fileBytes);
                                 string threatName = ExtractThreatName(fileBytes);
@@ -67,19 +69,19 @@ namespace Timeline.Core.Parsers
 
                                 bag.Add(timelineEntry);
                             }
-                            catch
+                            catch (Exception)
                             {
                             }
                         }
                     }
-                    catch
+                    catch (Exception)
                     {
                     }
                 });
 
                 timelineEntries.AddRange(bag);
             }
-            catch
+            catch (Exception)
             {
             }
 

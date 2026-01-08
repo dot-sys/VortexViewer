@@ -11,6 +11,8 @@ namespace VortexViewer.Journal.Core.Models
         public long Usn { get; set; }
         public ulong FileReferenceNumber { get; set; }
         public ulong ParentFileReferenceNumber { get; set; }
+        public ulong ParentEntryNumber { get; set; }
+        public uint ParentSequenceNumber { get; set; }
         public long TimeStamp { get; set; }
         public uint Reason { get; set; }
         public uint FileAttributes { get; set; }
@@ -26,6 +28,11 @@ namespace VortexViewer.Journal.Core.Models
             long usn = BitConverter.ToInt64(buffer, offset + 8);
             ulong fileReferenceNumber = BitConverter.ToUInt64(buffer, offset + 16);
             ulong parentFileReferenceNumber = BitConverter.ToUInt64(buffer, offset + 24);
+
+            // Extract ParentEntryNumber (lower 48 bits) and ParentSequenceNumber (upper 16 bits)
+            ulong parentEntryNumber = parentFileReferenceNumber & 0x0000FFFFFFFFFFFF;
+            uint parentSequenceNumber = (uint)((parentFileReferenceNumber >> 48) & 0xFFFF);
+
             long timeStamp = BitConverter.ToInt64(buffer, offset + 32);
             uint reason = BitConverter.ToUInt32(buffer, offset + 40);
             uint fileAttributes = BitConverter.ToUInt32(buffer, offset + 52);
@@ -47,6 +54,8 @@ namespace VortexViewer.Journal.Core.Models
                 Usn = usn,
                 FileReferenceNumber = fileReferenceNumber,
                 ParentFileReferenceNumber = parentFileReferenceNumber,
+                ParentEntryNumber = parentEntryNumber,
+                ParentSequenceNumber = parentSequenceNumber,
                 TimeStamp = timeStamp,
                 Reason = reason,
                 FileAttributes = fileAttributes,

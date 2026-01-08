@@ -56,13 +56,10 @@ namespace Timeline.Core.Parsers
             {
                 new RegistryParserDefinition(@"Microsoft\Windows\CurrentVersion\Uninstall", "Registry", "Program Installed", ParseUninstallKeyAsync, HiveType.SOFTWARE),
                 new RegistryParserDefinition(@"Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall", "Registry", "Program Installed", ParseUninstallKeyAsync, HiveType.SOFTWARE),
-                new RegistryParserDefinition(@"Microsoft\Windows NT\CurrentVersion\AppCompatFlags\CIT\System", "CIT System", "Run Executable", (key, progress, ct) => ParseValueAsPathAsync(key, progress, ct), HiveType.SOFTWARE),
-                new RegistryParserDefinition(@"Microsoft\Windows NT\CurrentVersion\AppCompatFlags\CIT\Module", "CIT Module", "Run Executable", (key, progress, ct) => ParseValueAsPathAsync(key, progress, ct), HiveType.SOFTWARE),
-                new RegistryParserDefinition(@"Microsoft\RADAR\HeapLeakDetection\DiagnosedApplications", "RADAR HeapLeakDetection", "Run Executable", ParseHeapLeakDetectionAsync, HiveType.SOFTWARE),
+                new RegistryParserDefinition(@"Microsoft\Windows\CurrentVersion\Run", "Run", "AutoRun", ParseRunKeyAsync, HiveType.SOFTWARE),
 
                 new RegistryParserDefinition(@"Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist", "UserAssist", "Run Executable", ParseUserAssistAsync, HiveType.NTUSER),
                 new RegistryParserDefinition(@"Software\Microsoft\Windows\CurrentVersion\Run", "Run", "AutoRun", ParseRunKeyAsync, HiveType.NTUSER),
-                new RegistryParserDefinition(@"Software\Microsoft\Windows\CurrentVersion\RunOnce", "RunOnce", "AutoRun", ParseRunKeyAsync, HiveType.NTUSER),
                 new RegistryParserDefinition(@"Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs", "RecentDocs", "Opens a File", ParseRecentDocsAsync, HiveType.NTUSER),
                 new RegistryParserDefinition(@"Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU", "RunMRU", "Opens a File", ParseMruListAsync, HiveType.NTUSER),
                 new RegistryParserDefinition(@"Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths", "TypedPaths", "Opens a File", (key, progress, ct) => ParseValueAsPathAsync(key, progress, ct), HiveType.NTUSER),
@@ -96,14 +93,14 @@ namespace Timeline.Core.Parsers
                 if (tasks.Count >= Environment.ProcessorCount)
                 {
                     var results = await Task.WhenAll(tasks);
-                    foreach (var result in results)
+                    foreach (var (Source, Description, Entries) in results)
                     {
-                        foreach (var entry in result.Entries)
+                        foreach (var entry in Entries)
                         {
-                            entry.Source = result.Source;
-                            entry.Description = result.Description;
+                            entry.Source = Source;
+                            entry.Description = Description;
                         }
-                        entries.AddRange(result.Entries);
+                        entries.AddRange(Entries);
                     }
                     tasks.Clear();
                 }
@@ -112,15 +109,16 @@ namespace Timeline.Core.Parsers
             if (tasks.Count > 0)
             {
                 var results = await Task.WhenAll(tasks);
-                foreach (var result in results)
+                foreach (var (Source, Description, Entries) in results)
                 {
-                    foreach (var entry in result.Entries)
+                    foreach (var entry in Entries)
                     {
-                        entry.Source = result.Source;
-                        entry.Description = result.Description;
+                        entry.Source = Source;
+                        entry.Description = Description;
                     }
-                    entries.AddRange(result.Entries);
+                    entries.AddRange(Entries);
                 }
+
             }
 
             progress?.Report(100);
@@ -133,6 +131,7 @@ namespace Timeline.Core.Parsers
             try
             {
                 var targetKey = hive.GetKey(parser.KeyPath);
+                
                 if (targetKey != null)
                 {
                     List<RegistryEntry> parsedEntries;
@@ -289,6 +288,7 @@ namespace Timeline.Core.Parsers
         private static async Task<List<RegistryEntry>> ParseRunKeyAsync(RegistryKey runKey, IProgress<int> progress, CancellationToken cancellationToken)
         {
             var values = runKey.Values?.ToList() ?? new List<KeyValue>();
+            
             var bag = new System.Collections.Concurrent.ConcurrentBag<RegistryEntry>();
             
             await Task.Run(() =>
@@ -313,7 +313,9 @@ namespace Timeline.Core.Parsers
                             OtherInfo = $"Value Name: {value.ValueName ?? ""}"
                         });
                     }
-                    catch { }
+                    catch (Exception)
+                    {
+                    }
                 });
             }, cancellationToken);
             
@@ -436,9 +438,18 @@ namespace Timeline.Core.Parsers
                     try
                     {
                         var keyName = subKey.KeyName ?? "";
-                        if (keyName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                        
+                        // Extract just the executable name from the full key path
+                        var executableName = keyName;
+                        var lastBackslash = keyName.LastIndexOf('\\');
+                        if (lastBackslash >= 0 && lastBackslash < keyName.Length - 1)
                         {
-                            var normalizedPath = PathCleaner.NormalizePath(keyName);
+                            executableName = keyName.Substring(lastBackslash + 1);
+                        }
+                        
+                        if (executableName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var normalizedPath = PathCleaner.NormalizePath(executableName);
                             var utcTime = subKey.LastWriteTime ?? DateTimeOffset.MinValue;
                             var localTime = utcTime.ToLocalTime();
 
@@ -451,40 +462,6 @@ namespace Timeline.Core.Parsers
                                 OtherInfo = "Jump List"
                             });
                         }
-                    }
-                    catch { }
-                });
-            }, cancellationToken);
-            
-            progress?.Report(100);
-            return bag.ToList();
-        }
-
-        private static async Task<List<RegistryEntry>> ParseHeapLeakDetectionAsync(RegistryKey diagnosedAppsKey, IProgress<int> progress, CancellationToken cancellationToken)
-        {
-            var bag = new System.Collections.Concurrent.ConcurrentBag<RegistryEntry>();
-            var subKeys = diagnosedAppsKey.SubKeys?.ToList() ?? new List<RegistryKey>();
-            
-            await Task.Run(() =>
-            {
-                var po = new ParallelOptions { CancellationToken = cancellationToken, MaxDegreeOfParallelism = Environment.ProcessorCount };
-                Parallel.ForEach(subKeys, po, subKey =>
-                {
-                    try
-                    {
-                        var appName = subKey.KeyName ?? "";
-                        var normalizedPath = PathCleaner.NormalizePath(appName);
-                        var utcTime = subKey.LastWriteTime ?? DateTimeOffset.MinValue;
-                        var localTime = utcTime.ToLocalTime();
-
-                        bag.Add(new RegistryEntry
-                        {
-                            Timestamp = localTime,
-                            Source = "RADAR HeapLeakDetection",
-                            Description = "Run Executable",
-                            Path = normalizedPath,
-                            OtherInfo = "Heap Leak Detected"
-                        });
                     }
                     catch { }
                 });
@@ -597,13 +574,22 @@ namespace Timeline.Core.Parsers
 
                             var normalizedPath = PathCleaner.NormalizePath(installLocationValue.ValueData.Trim());
 
+                            // Extract just the program name from the full key path
+                            var keyName = subKey.KeyName ?? "";
+                            var programName = keyName;
+                            var lastBackslash = keyName.LastIndexOf('\\');
+                            if (lastBackslash >= 0 && lastBackslash < keyName.Length - 1)
+                            {
+                                programName = keyName.Substring(lastBackslash + 1);
+                            }
+
                             bag.Add(new RegistryEntry
                             {
                                 Timestamp = timestamp,
                                 Source = "Registry",
                                 Description = "Program Installed",
                                 Path = normalizedPath,
-                                OtherInfo = $"Program: {subKey.KeyName ?? ""}"
+                                OtherInfo = $"Program: {programName}"
                             });
                         }
                     }

@@ -22,7 +22,7 @@ namespace Drives.Core.Core
                 var setupApiEntries = SetupApiParser.ParseSetupApiLogs();
                 allEntries.AddRange(setupApiEntries);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -31,7 +31,7 @@ namespace Drives.Core.Core
                 var pnpEntries = PnpDeviceParser.ParsePnpDevices();
                 allEntries.AddRange(pnpEntries);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -40,7 +40,7 @@ namespace Drives.Core.Core
                 var eventLogEntries = UsbEventLogParser.ParseEventLogs();
                 allEntries.AddRange(eventLogEntries);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -52,7 +52,7 @@ namespace Drives.Core.Core
                 }
                 allEntries.AddRange(registryEntries);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -69,7 +69,7 @@ namespace Drives.Core.Core
             {
                 volumes = VolumeInfoParser.GetVolumeInformation();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -96,18 +96,20 @@ namespace Drives.Core.Core
 
             try
             {
-                // FIXED: Use live registry instead of hive files
-                // Call UsbRegistryParser which uses Microsoft.Win32.Registry to read live registry
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                
                 var pnpEntries = UsbRegistryParser.ParseUsbStorRegistry();
                 
-                // Entries already have Log = "Reg" set in UsbRegistryParser
                 foreach (var entry in pnpEntries)
                 {
                 }
                 
                 entries.AddRange(pnpEntries);
+                
+                GC.Collect(0, GCCollectionMode.Optimized);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 

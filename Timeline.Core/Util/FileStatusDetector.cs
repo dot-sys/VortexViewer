@@ -63,7 +63,7 @@ namespace Timeline.Core.Util
         
         if (string.IsNullOrEmpty(filePath))
         {
-            info.Status = "Invalid";
+            info.Status = string.Empty;
             return info;
         }
 
@@ -73,87 +73,106 @@ namespace Timeline.Core.Util
             return info;
         }
 
-        bool exists = fileExists ?? File.Exists(filePath);
-        if (!exists)
+        if (!(fileExists ?? File.Exists(filePath)))
         {
             info.Status = "Invalid";
             return info;
         }
 
+        // Signature validation with minimal exception handling
+        // X509Certificate.Create.FromSignedFile throws CryptographicException even for
+        // unsigned files, which floods debug output. We catch it silently.
+        X509Certificate cert;
+        
+        try
+        {
+            cert = X509Certificate.CreateFromSignedFile(filePath);
+        }
+        catch (CryptographicException)
+        {
+            // File is not signed or has corrupted/invalid signature
+            info.Status = "NotSigned";
+            return info;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            info.Status = "Unknown";
+            return info;
+        }
+        catch (IOException)
+        {
+            info.Status = "Unknown";
+            return info;
+        }
+        catch
+        {
+            info.Status = "Unknown";
+            return info;
+        }
+        
+        // cert is guaranteed to be assigned here if we didn't return early
+        X509Certificate2 cert2 = null;
+        
+        try
+        {
+            cert2 = new X509Certificate2(cert);
+            
+            // Extract certificate fields
+            info.CN = ExtractCertificateField(cert2.Subject, "CN");
+            info.OU = ExtractCertificateField(cert2.Subject, "OU");
+            info.S = ExtractCertificateField(cert2.Subject, "S");
+            
+            // Get serial number (first 8 chars)
+            if (!string.IsNullOrEmpty(cert2.SerialNumber) && cert2.SerialNumber.Length > 8)
+            {
+                info.Serial = cert2.SerialNumber.Substring(0, 8);
+            }
+            else
+            {
+                info.Serial = cert2.SerialNumber ?? string.Empty;
+            }
+            
+            // Validate certificate chain
+            var chain = new X509Chain();
+            chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+            chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+            
+            bool isValid = false;
             try
             {
-                X509Certificate2 cert = null;
-                
-                try
-                {
-                    cert = new X509Certificate2(X509Certificate.CreateFromSignedFile(filePath));
-                }
-                catch (CryptographicException)
-                {
-                    // Malformed or corrupted certificate data
-                    info.Status = "NotSigned";
-                    return info;
-                }
-                catch
-                {
-                    info.Status = "NotSigned";
-                    return info;
-                }
-
-                if (cert == null)
-                {
-                    info.Status = "NotSigned";
-                    return info;
-                }
-
-                try
-                {
-                    var chain = new X509Chain();
-                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                    bool isValid = chain.Build(cert);
-                    
-                    info.Status = isValid ? "Valid" : "Invalid";
-
-                    var subject = cert.Subject;
-                    info.CN = ExtractCertificateField(subject, "CN");
-                    info.OU = ExtractCertificateField(subject, "OU");
-                    info.S = ExtractCertificateField(subject, "S");
-                    
-                    var serialNumber = cert.SerialNumber;
-                    if (!string.IsNullOrEmpty(serialNumber) && serialNumber.Length >= 5)
-                    {
-                        info.Serial = serialNumber.Substring(0, 5);
-                    }
-                    else
-                    {
-                        info.Serial = serialNumber ?? string.Empty;
-                    }
-                }
-                catch (CryptographicException)
-                {
-                    // Error building certificate chain or accessing certificate properties
-                    info.Status = "Invalid";
-                    return info;
-                }
-                finally
-                {
-                    cert?.Dispose();
-                }
-                
-                return info;
+                isValid = chain.Build(cert2);
             }
             catch (CryptographicException)
             {
-                // Top-level crypto exception handler
-                info.Status = "Unknown";
-                return info;
+                // Chain validation failed
+                isValid = false;
             }
-            catch
+            
+            if (isValid)
             {
-                info.Status = "Unknown";
-                return info;
+                info.Status = "Signed";
+            }
+            else
+            {
+                // Certificate exists but chain validation failed
+                info.Status = "Invalid";
             }
         }
+        catch (CryptographicException)
+        {
+            info.Status = "Invalid";
+        }
+        catch
+        {
+            info.Status = "Unknown";
+        }
+        finally
+        {
+            cert2?.Dispose();
+        }
+        
+        return info;
+    }
         
         private static string ExtractCertificateField(string subject, string fieldName)
         {
@@ -295,8 +314,26 @@ namespace Timeline.Core.Util
 
                 return true;
             }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                // CryptographicException thrown when accessing corrupted registry/shell bag data
+                // On crypto exception, don't assume deleted - return false
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Permission denied - file may exist but we can't access it
+                return false;
+            }
+            catch (IOException)
+            {
+                // I/O error (network timeout, device not ready, etc.)
+                return false;
+            }
             catch
             {
+                // On exception (e.g., access denied), don't assume deleted
+                // Return false to be conservative
                 return false;
             }
         }
@@ -323,7 +360,7 @@ namespace Timeline.Core.Util
         var modified = DetectModificationStatus(filePath);
         
         bool fileExists = false;
-        string pathStatus = null;
+        string pathStatus;
         
         if (!string.IsNullOrEmpty(filePath))
         {
@@ -347,9 +384,21 @@ namespace Timeline.Core.Util
                     pathStatus = "Unknown";
                 }
             }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                pathStatus = "Unknown";
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pathStatus = "Unknown";
+            }
+            catch (IOException)
+            {
+                pathStatus = "Unknown";
+            }
             catch
             {
-                pathStatus = "Deleted";
+                pathStatus = "Unknown";
             }
         }
         else
@@ -365,11 +414,15 @@ namespace Timeline.Core.Util
         }
         else if (pathStatus == "Unknown")
         {
-            signatureInfo = new SignatureInfo { Status = "Invalid" };
-            modified = "Unknown";
+            signatureInfo = new SignatureInfo { Status = string.Empty };
+            if (string.IsNullOrEmpty(modified))
+            {
+                modified = "Unknown";
+            }
         }
         else
         {
+            // File is present - perform actual signature extraction
             signatureInfo = ExtractSignatureInfo(filePath, fileExists);
         }
         

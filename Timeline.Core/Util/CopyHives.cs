@@ -181,8 +181,7 @@ namespace Timeline.Core.Util
 
         private static bool EnablePrivilege(IntPtr tokenHandle, string privilegeName)
         {
-            LUID luid;
-            if (!LookupPrivilegeValue(null, privilegeName, out luid))
+            if (!LookupPrivilegeValue(null, privilegeName, out LUID luid))
             {
                 return false;
             }
@@ -210,13 +209,19 @@ namespace Timeline.Core.Util
 
                 var result = await Task.Run(() =>
                 {
-                    if (!File.Exists(livePath))
+                    var upperHiveName = hiveName.ToUpperInvariant();
+                    bool isSystemHive = upperHiveName == "SYSTEM" || upperHiveName == "SOFTWARE" || 
+                                       upperHiveName == "SAM" || upperHiveName == "SECURITY";
+                    
+                    if (!isSystemHive && !File.Exists(livePath))
                     {
                         progress?.Report($"Error: {hiveName} not found at {livePath}");
                         return (hiveName, null, false);
                     }
                     
-                    if (RegSaveCommand(hiveName, livePath, tempPath, progress))
+                    bool regSaveResult = RegSaveCommand(hiveName, livePath, tempPath, progress);
+                    
+                    if (regSaveResult)
                     {
                         return (hiveName, tempPath, true);
                     }
@@ -238,9 +243,27 @@ namespace Timeline.Core.Util
             try
             {
                 string regKeyPath = GetRegistryKeyPath(hiveName);
+                
                 if (string.IsNullOrEmpty(regKeyPath))
                 {
                     progress?.Report($"Warning: No registry key path found for {hiveName}");
+                    
+                    try
+                    {
+                        if (File.Exists(sourcePath))
+                        {
+                            File.Copy(sourcePath, destPath, true);
+                            if (File.Exists(destPath))
+                            {
+                                var fileInfo = new FileInfo(destPath);
+                                return true;
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    
                     return false;
                 }
 
@@ -261,10 +284,32 @@ namespace Timeline.Core.Util
                     WindowStyle = ProcessWindowStyle.Hidden
                 };
 
-
                 using (var process = new Process { StartInfo = startInfo })
                 {
-                    process.Start();
+                    try
+                    {
+                        process.Start();
+                    }
+                    catch (System.ComponentModel.Win32Exception)
+                    {
+                        try
+                        {
+                            if (File.Exists(sourcePath))
+                            {
+                                File.Copy(sourcePath, destPath, true);
+                                if (File.Exists(destPath))
+                                {
+                                    var fileInfo = new FileInfo(destPath);
+                                    return true;
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
+                        
+                        return false;
+                    }
                     
                     string output = process.StandardOutput.ReadToEnd();
                     string error = process.StandardError.ReadToEnd();
@@ -278,9 +323,6 @@ namespace Timeline.Core.Util
                         return false;
                     }
 
-                    if (!string.IsNullOrWhiteSpace(output))
-                    {
-                    }
                     if (!string.IsNullOrWhiteSpace(error))
                     {
                         progress?.Report($"Error saving {hiveName}: {error.Trim()}");
@@ -293,6 +335,22 @@ namespace Timeline.Core.Util
                     }
                     else
                     {
+                        try
+                        {
+                            if (File.Exists(sourcePath))
+                            {
+                                File.Copy(sourcePath, destPath, true);
+                                if (File.Exists(destPath))
+                                {
+                                    var fileInfo = new FileInfo(destPath);
+                                    return true;
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
+                        
                         return false;
                     }
                 }

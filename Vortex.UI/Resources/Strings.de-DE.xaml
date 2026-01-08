@@ -1,0 +1,135 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- Main Window -->
+    <system:String x:Key="Language">Sprache</system:String>
+    <system:String x:Key="Refresh">Aktualisieren</system:String>
+    <system:String x:Key="Minimize">Minimieren</system:String>
+    <system:String x:Key="Close">Schließen</system:String>
+    
+    <!-- Navigation Buttons -->
+    <system:String x:Key="Journal">Journal</system:String>
+    <system:String x:Key="Processes">Prozesse</system:String>
+    <system:String x:Key="Timeline">Timeline</system:String>
+    <system:String x:Key="Drives">Laufwerke</system:String>
+    
+    <!-- Welcome View -->
+    <system:String x:Key="VortexViewer">Vortex Viewer</system:String>
+    <system:String x:Key="StartTrace">Trace starten</system:String>
+    <system:String x:Key="Loading">Lädt</system:String>
+    <system:String x:Key="ProcessIsProtected">Prozess ist geschützt</system:String>
+    
+    <!-- Dashboard View -->
+    <system:String x:Key="SystemInformationDashboard">System-Info-Dashboard</system:String>
+    <system:String x:Key="HardwareInformation">Hardware-Informationen</system:String>
+    <system:String x:Key="SoftwareInformation">Software-Informationen</system:String>
+    <system:String x:Key="TamperingChecks">Manipulations-Prüfungen</system:String>
+    <system:String x:Key="Property">Eigenschaft</system:String>
+    <system:String x:Key="Value">Wert</system:String>
+    
+    <!-- Journal View -->
+    <system:String x:Key="Created">Erstellt</system:String>
+    <system:String x:Key="Deleted">Gelöscht</system:String>
+    <system:String x:Key="Renamed">Umbenannt</system:String>
+    <system:String x:Key="DataChanged">Daten geändert</system:String>
+    <system:String x:Key="Timestamp">Zeitstempel</system:String>
+    <system:String x:Key="Path">Pfad</system:String>
+    <system:String x:Key="Reason">Grund</system:String>
+    <system:String x:Key="Extension">Erweiterung</system:String>
+    <system:String x:Key="ShowInfo">Info anzeigen</system:String>
+    <system:String x:Key="Entries">Einträge</system:String>
+    <system:String x:Key="ReduceDuplicates">Duplikate reduzieren</system:String>
+    <system:String x:Key="FilterSpamlogs">Spam-Logs filtern</system:String>
+    <system:String x:Key="First">Erste</system:String>
+    <system:String x:Key="Last">Letzte</system:String>
+    <system:String x:Key="GoToFirstPage">Zur ersten Seite</system:String>
+    <system:String x:Key="Previous5Pages">5 Seiten zurück</system:String>
+    <system:String x:Key="PreviousPage">Vorherige Seite</system:String>
+    <system:String x:Key="NextPage">Nächste Seite</system:String>
+    <system:String x:Key="Next5Pages">5 Seiten vor</system:String>
+    <system:String x:Key="GoToLastPage">Zur letzten Seite</system:String>
+    
+    <!-- Processes View -->
+    <system:String x:Key="GetStrings">Strings</system:String>
+    <system:String x:Key="ChooseProcess">Prozess auswählen</system:String>
+    <system:String x:Key="SearchStrings">Strings suchen (Regex erlaubt)</system:String>
+    <system:String x:Key="GetPCA">PCA abrufen</system:String>
+    <system:String x:Key="Min">Min.:</system:String>
+    <system:String x:Key="Max">Max.:</system:String>
+    <system:String x:Key="Regex">Regex</system:String>
+    <system:String x:Key="StartsWith">Beginnt mit</system:String>
+    <system:String x:Key="EndsWith">Endet mit</system:String>
+    <system:String x:Key="UnicodeStrings">Unicode-Strings</system:String>
+    <system:String x:Key="CombineProcesses">Prozesse kombinieren</system:String>
+    <system:String x:Key="ReduceNonsenseStrings">Unsinn-Strings reduzieren</system:String>
+    <system:String x:Key="WinPathStrings">Win-Pfad-Strings</system:String>
+    <system:String x:Key="URLStrings">URL-Strings</system:String>
+    <system:String x:Key="Stringlist">String-Liste</system:String>
+    <system:String x:Key="ShowProcessUptimes">Prozess-Laufzeiten anzeigen</system:String>
+    <system:String x:Key="Strings">Strings</system:String>
+    <system:String x:Key="MinLengthTooltip">Minimale String-Länge, die aus dem Prozessspeicher extrahiert wird.</system:String>
+    <system:String x:Key="MaxLengthTooltip">Maximale String-Länge zum Extrahieren. Leer lassen oder ∞ für unbegrenzt verwenden.</system:String>
+    <system:String x:Key="GetPCATooltip">PCA-Traces (Programm-Kompatibilitätsassistent) aus Explorer.exe, RuntimeBroker.exe und PCASVC extrahieren</system:String>
+    <system:String x:Key="RegexTooltip">Regex-Suche zum Filtern von Strings aktivieren.</system:String>
+    <system:String x:Key="StartsWithTooltip">Strings filtern, die mit dem Suchtext beginnen.</system:String>
+    <system:String x:Key="EndsWithTooltip">Strings filtern, die mit dem Suchtext enden.</system:String>
+    <system:String x:Key="UnicodeStringsTooltip">Extrahiert Unicode-Strings aus dem Prozessspeicher.</system:String>
+    <system:String x:Key="CombineProcessesTooltip">Gruppiert alle Prozesse mit demselben Namen und kombiniert deren Ergebnisse. WARNUNG: Kann bei großen Prozessen langsam sein und viele Ressourcen verbrauchen.</system:String>
+    <system:String x:Key="ReduceDuplicatesTooltip">Entfernt doppelte Strings aus den Ergebnissen.</system:String>
+    <system:String x:Key="ReduceNonsenseStringsTooltip">Filtert Strings heraus, die wahrscheinlich zufällig oder bedeutungslos sind.</system:String>
+    <system:String x:Key="WinPathStringsTooltip">Extrahiert Windows-Dateipfade (z.B. C:\Pfad\zur\Datei.exe) aus dem Prozessspeicher.</system:String>
+    <system:String x:Key="URLStringsTooltip">Extrahiert Web-URLs (z.B. https://example.com) aus dem Prozessspeicher nach RFC 3986.</system:String>
+    
+    <!-- Timeline View -->
+    <system:String x:Key="ShowDeleted">Gelöschte anzeigen</system:String>
+    <system:String x:Key="ShowOnlyUnknown">Unbekannte anzeigen</system:String>
+    <system:String x:Key="ShowOnlyExe">Exe anzeigen</system:String>
+    <system:String x:Key="ShowOnlyWinPaths">Win-Pfade anzeigen</system:String>
+    <system:String x:Key="ShowOnlyNotSigned">Nicht signierte anzeigen</system:String>
+    <system:String x:Key="ColoredResults">Farbige Ergebnisse</system:String>
+    <system:String x:Key="FilterByDescription">Beschreibung</system:String>
+    <system:String x:Key="FilterBySource">Quelle</system:String>
+    <system:String x:Key="Description">Beschreibung</system:String>
+    <system:String x:Key="Modified">Geändert</system:String>
+    <system:String x:Key="Signed">Signiert</system:String>
+    <system:String x:Key="Source">Quelle</system:String>
+    <system:String x:Key="ShowParseInfo">Parse-Info anzeigen</system:String>
+    <system:String x:Key="RemoveDuplicates">Duplikate entfernen</system:String>
+    <system:String x:Key="HideSystem32Logs">System32-Logs ausblenden</system:String>
+    <system:String x:Key="ShowParseInfoTooltip">Eintragsanzahl pro Quelle anzeigen (nützlich zur Erkennung von Datenmanipulation)</system:String>
+    <system:String x:Key="RemoveDuplicatesTooltip">Doppelte Einträge mit gleichem Zeitstempel und Pfad herausfiltern (andere Informationen werden ignoriert)</system:String>
+    <system:String x:Key="HideSystem32LogsTooltip">Alle Dateien aus C:\Windows\System32\ ausblenden</system:String>
+    
+    <!-- Drives View -->
+    <system:String x:Key="Overview">Übersicht</system:String>
+    <system:String x:Key="ConnectedDrives">Verbundene</system:String>
+    <system:String x:Key="DeviceName">Gerätename</system:String>
+    <system:String x:Key="Label">Bezeichnung</system:String>
+    <system:String x:Key="Drive">Laufw.</system:String>
+    <system:String x:Key="BusType">Bus-Typ</system:String>
+    <system:String x:Key="Serial">Seriennummer</system:String>
+    <system:String x:Key="UniqueIdentifier">Eindeutige ID</system:String>
+    <system:String x:Key="DiskNumber">Disk-Nr.</system:String>
+    <system:String x:Key="FileSystem">Dateisystem</system:String>
+    <system:String x:Key="Size">Größe</system:String>
+    <system:String x:Key="PartitionID">Partitions-ID</system:String>
+    <system:String x:Key="FormatDate">Formatierungsdatum</system:String>
+    <system:String x:Key="Action">Aktion</system:String>
+    <system:String x:Key="Log">Log</system:String>
+    <system:String x:Key="Page">Seite:</system:String>
+    
+    <!-- Context Menu -->
+    <system:String x:Key="CopyValue">Wert kopieren</system:String>
+    <system:String x:Key="CopyRow">Zeile kopieren</system:String>
+    <system:String x:Key="GoTo">Gehe zu</system:String>
+    
+    <!-- Info Popup Window -->
+    <system:String x:Key="Info">Info</system:String>
+    
+
+    <!-- Error Messages -->
+    <system:String x:Key="AccessDenied">Zugriff verweigert</system:String>
+    <system:String x:Key="ProcessCannotBeOpened">Dieser Prozess kann nicht geöffnet werden.</system:String>
+    
+</ResourceDictionary>

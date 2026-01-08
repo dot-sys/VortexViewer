@@ -32,6 +32,7 @@ namespace Vortex.UI.ViewModels
                 if (_selectedProcess != value)
                 {
                     _selectedProcess = value;
+                    IsProcessProtected = false;
                     OnPropertyChanged();
                 }
             }
@@ -311,6 +312,20 @@ namespace Vortex.UI.ViewModels
             }
         }
 
+        private bool _isProcessProtected;
+        public bool IsProcessProtected
+        {
+            get => _isProcessProtected;
+            set
+            {
+                if (_isProcessProtected != value)
+                {
+                    _isProcessProtected = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         private CancellationTokenSource _getStringsCts;
 
         public ProcessesViewModel()
@@ -380,6 +395,7 @@ namespace Vortex.UI.ViewModels
             }
 
             IsLoadingStrings = true;
+            IsProcessProtected = false;
             MemoryStrings.Clear();
             _allStrings.Clear();
             OnPropertyChanged(nameof(ExtractedStringsCount));
@@ -426,6 +442,25 @@ namespace Vortex.UI.ViewModels
                 _activeStrings.Clear();
                 MemoryStrings.Clear();
                 OnPropertyChanged(nameof(ExtractedStringsCount));
+            }
+            catch (Win32Exception ex)
+            {
+                if (ex.NativeErrorCode == 5 || ex.NativeErrorCode == 0x5)
+                {
+                    IsProcessProtected = true;
+                    _allStrings.Clear();
+                    _activeStrings.Clear();
+                    MemoryStrings.Clear();
+                    OnPropertyChanged(nameof(ExtractedStringsCount));
+                    
+                    await Task.Delay(3000);
+                    IsProcessProtected = false;
+                    return;
+                }
+                else
+                {
+                    MessageBox.Show($"Failed to access process: {ex.Message} (Error Code: {ex.NativeErrorCode})", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -495,7 +530,7 @@ namespace Vortex.UI.ViewModels
                             display = $"{name} ({shownIdsString}, ... )";
                             // If still too long (edge case), cut to max length
                             if (display.Length > MaxDisplayLength)
-                                display = display.Substring(0, MaxDisplayLength - 1) + "…";
+                                display = display.Substring(0, MaxDisplayLength - 1) + "ï¿½";
                         }
                         return new CombinedProcessInfo(name, ids, display);
                     })
@@ -515,8 +550,7 @@ namespace Vortex.UI.ViewModels
         {
             if (string.IsNullOrEmpty(ProcessFilterText))
                 return true;
-            var process = obj as ProcessInfo;
-            return process != null && process.ToString().IndexOf(ProcessFilterText, System.StringComparison.OrdinalIgnoreCase) >= 0;
+            return obj is ProcessInfo process && process.ToString().IndexOf(ProcessFilterText, System.StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private void UpdateActiveStrings()

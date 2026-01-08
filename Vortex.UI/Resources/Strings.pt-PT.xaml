@@ -1,0 +1,98 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- Main Window -->
+    <system:String x:Key="Language">Idioma</system:String>
+    <system:String x:Key="Refresh">Atualizar</system:String>
+    <system:String x:Key="Minimize">Minimizar</system:String>
+    <system:String x:Key="Close">Fechar</system:String>
+    
+    <!-- Navigation Buttons -->
+    <system:String x:Key="Journal">Diário</system:String>
+    <system:String x:Key="Processes">Processos</system:String>
+    <system:String x:Key="Timeline">Linha do Tempo</system:String>
+    <system:String x:Key="Drives">Unidades</system:String>
+    
+    <!-- Welcome View -->
+    <system:String x:Key="VortexViewer">Vortex Viewer</system:String>
+    <system:String x:Key="StartTrace">Iniciar Rastreamento</system:String>
+    <system:String x:Key="Loading">Carregando</system:String>
+    <system:String x:Key="ProcessIsProtected">Processo está protegido</system:String>
+    
+    <!-- Dashboard View -->
+    <system:String x:Key="SystemInformationDashboard">Painel de Informações do Sistema</system:String>
+    <system:String x:Key="HardwareInformation">Informações de Hardware</system:String>
+    <system:String x:Key="SoftwareInformation">Informações de Software</system:String>
+    <system:String x:Key="TamperingChecks">Verificações de Manipulação</system:String>
+    <system:String x:Key="Property">Propriedade</system:String>
+    <system:String x:Key="Value">Valor</system:String>
+    
+    <!-- Journal View -->
+    <system:String x:Key="Created">Criado</system:String>
+    <system:String x:Key="Deleted">Excluído</system:String>
+    <system:String x:Key="Renamed">Renomeado</system:String>
+    <system:String x:Key="DataChanged">Dados Alterados</system:String>
+    <system:String x:Key="Timestamp">Data/Hora</system:String>
+    <system:String x:Key="Path">Caminho</system:String>
+    <system:String x:Key="Extension">Extensão</system:String>
+    <system:String x:Key="Reason">Motivo</system:String>
+    <system:String x:Key="ShowInfo">Mostrar Informações</system:String>
+    <system:String x:Key="Entries">Entradas</system:String>
+    <system:String x:Key="ReduceDuplicates">Reduzir Duplicados</system:String>
+    <system:String x:Key="FilterSpamlogs">Filtrar Spamlogs</system:String>
+    <system:String x:Key="First">Primeiro</system:String>
+    <system:String x:Key="Last">Último</system:String>
+    <system:String x:Key="GoToFirstPage">Ir para a primeira página</system:String>
+    <system:String x:Key="Previous5Pages">5 páginas anteriores</system:String>
+    <system:String x:Key="PreviousPage">Página anterior</system:String>
+    <system:String x:Key="NextPage">Próxima página</system:String>
+    <system:String x:Key="Next5Pages">Próximas 5 páginas</system:String>
+    <system:String x:Key="GoToLastPage">Ir para a última página</system:String>
+    
+    <!-- Processes View -->
+    <system:String x:Key="GetStrings">Obter Strings</system:String>
+    <system:String x:Key="ChooseProcess">Escolher Processo</system:String>
+    <system:String x:Key="SearchStrings">Pesquisar Strings (regex permitido)</system:String>
+    <system:String x:Key="GetPCA">Obter PCA</system:String>
+    <system:String x:Key="Min">Mín.:</system:String>
+    <system:String x:Key="Max">Máx.:</system:String>
+    <system:String x:Key="Regex">Regex</system:String>
+    <system:String x:Key="StartsWith">Começa com</system:String>
+    <system:String x:Key="EndsWith">Termina com</system:String>
+    <system:String x:Key="UnicodeStrings">Strings Unicode</system:String>
+    <system:String x:Key="CombineProcesses">Combinar Processos</system:String>
+    <system:String x:Key="ReduceNonsenseStrings">Reduzir Strings Sem Sentido</system:String>
+    <system:String x:Key="WinPathStrings">Strings de Caminho do Windows</system:String>
+    <system:String x:Key="URLStrings">Strings de URL</system:String>
+    <system:String x:Key="Stringlist">Lista de Strings</system:String>
+    <system:String x:Key="ShowProcessUptimes">Mostrar Tempos de Atividade do Processo</system:String>
+    <system:String x:Key="Strings">Strings</system:String>
+    <system:String x:Key="MinLengthTooltip">Comprimento mínimo da string para extrair da memória do processo.</system:String>
+    <system:String x:Key="MaxLengthTooltip">Comprimento máximo da string para extrair. Deixe em branco ou use ∞ para ilimitado.</system:String>
+    <system:String x:Key="GetPCATooltip">Extrair rastros do PCA (Assistente de Compatibilidade de Programas) de Explorer.exe, RuntimeBroker.exe e PCASVC</system:String>
+    <system:String x:Key="RegexTooltip">Ativar pesquisa regex para filtragem de strings.</system:String>
+    <system:String x:Key="StartsWithTooltip">Filtrar strings que começam com o texto de pesquisa.</system:String>
+    <system:String x:Key="EndsWithTooltip">Filtrar strings que terminam com o texto de pesquisa.</system:String>
+    <system:String x:Key="UnicodeStringsTooltip">Extrai strings Unicode da memória do processo.</system:String>
+    <system:String x:Key="CombineProcessesTooltip">Agrupa todos os processos com o mesmo nome e combina seus resultados. AVISO: Pode ser lento e usar muitos recursos para processos grandes.</system:String>
+    <system:String x:Key="ReduceDuplicatesTooltip">Remove strings duplicadas dos resultados.</system:String>
+    <system:String x:Key="ReduceNonsenseStringsTooltip">Filtra strings que provavelmente são aleatórias ou sem sentido.</system:String>
+    <system:String x:Key="WinPathStringsTooltip">Extrai caminhos de arquivos no estilo Windows (ex: C:\Caminho\para\Arquivo.exe) da memória do processo.</system:String>
+    <system:String x:Key="URLStringsTooltip">Extrai URLs da web (ex: https://exemplo.com) da memória do processo, seguindo RFC 3986.</system:String>
+    
+    <!-- Timeline View -->
+    <system:String x:Key="ShowDeleted">Mostrar Excluídos</system:String>
+    <system:String x:Key="ShowOnlyUnknown">Mostrar Desconhecidos</system:String>
+    <system:String x:Key="ShowOnlyExe">Mostrar Exe</system:String>
+    <system:String x:Key="ShowOnlyWinPaths">Mostrar Caminhos do Windows</system:String>
+    <system:String x:Key="ShowOnlyNotSigned">Mostrar Não Assinados</system:String>
+    <system:String x:Key="ColoredResults">Resultados Coloridos</system:String>
+    <system:String x:Key="FilterByDescription">Descrição</system:String>
+    <system:String x:Key="FilterBySource">Fonte</system:String>
+    <system:String x:Key="Description">Descrição</system:String>
+    <system:String x:Key="Modified">Modificado</system:String>
+    <system:String x:Key="Signed">Assinado</system:String>
+    <system:String x:Key="Source">Fonte</system:String>
+    
+</ResourceDictionary>

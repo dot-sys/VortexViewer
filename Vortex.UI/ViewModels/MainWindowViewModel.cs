@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Vortex.UI.Views;
@@ -21,6 +22,9 @@ namespace Vortex.UI.ViewModels
         private TimelineViewModel _timelineViewModel;
         // Instance of dashboard view model
         private DashboardViewModel _dashboardViewModel;
+        
+        // Tracks the current active view
+        private string _currentView = "Welcome";
 
         // Backing field for data loaded state
         private bool _isDataLoaded = false;
@@ -104,6 +108,7 @@ namespace Vortex.UI.ViewModels
                 var welcomeView = new WelcomeView();
                 welcomeView.DataContext = this;
                 _mainFrame.Navigate(welcomeView);
+                _currentView = "Welcome";
             }
         }
 
@@ -121,6 +126,7 @@ namespace Vortex.UI.ViewModels
                 var dashboardView = new DashboardView();
                 dashboardView.DataContext = _dashboardViewModel;
                 _mainFrame.Navigate(dashboardView);
+                _currentView = "Dashboard";
             }
         }
 
@@ -199,6 +205,7 @@ namespace Vortex.UI.ViewModels
                 if (result)
                 {
                     journalView.DataContext = _journalViewModel;
+                    _currentView = "Journal";
                 }
             }
             catch (Exception)
@@ -219,6 +226,7 @@ namespace Vortex.UI.ViewModels
 
                 var processesView = new ProcessesView();
                 _mainFrame.Navigate(processesView);
+                _currentView = "Processes";
             }
         }
 
@@ -238,6 +246,7 @@ namespace Vortex.UI.ViewModels
                 
                 
                 _mainFrame.Navigate(timelineView);
+                _currentView = "Timeline";
             }
         }
 
@@ -257,6 +266,7 @@ namespace Vortex.UI.ViewModels
                 
                 
                 _mainFrame.Navigate(drivesView);
+                _currentView = "Drives";
             }
         }
 
@@ -307,6 +317,35 @@ namespace Vortex.UI.ViewModels
             GC.Collect();
             
             NavigateToWelcome();
+        }
+        
+        // Reloads the current view to apply language changes
+        public void ReloadCurrentView()
+        {
+            switch (_currentView)
+            {
+                case "Welcome":
+                    NavigateToWelcome();
+                    break;
+                case "Dashboard":
+                    NavigateToDashboard();
+                    break;
+                case "Journal":
+                    NavigateToJournal();
+                    break;
+                case "Processes":
+                    NavigateToProcesses();
+                    break;
+                case "Timeline":
+                    NavigateToTimeline();
+                    break;
+                case "Drives":
+                    NavigateToDrives();
+                    break;
+                default:
+                    NavigateToWelcome();
+                    break;
+            }
         }
 
         // Property changed event for binding

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Management;
 using Microsoft.Win32;
 using SysInfo.Core.Models;
 using Tpm2Lib;
@@ -62,14 +63,75 @@ namespace SysInfo.Core.Util
         // Retrieves unique Windows machine GUID identifier
         private static string GetMachineGuid()
         {
-            return GetRegistryValue(@"SOFTWARE\Microsoft\Cryptography", "MachineGuid");
+            try
+            {
+                // Try 64-bit registry view first
+                using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                using (var key = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\Cryptography"))
+                {
+                    if (key != null)
+                    {
+                        var value = key.GetValue("MachineGuid");
+                        if (value != null)
+                        {
+                            var guidString = value.ToString();
+                            
+                            if (!string.IsNullOrWhiteSpace(guidString))
+                            {
+                                return guidString;
+                            }
+                        }
+                    }
+                }
+                
+                // Try 32-bit registry view as fallback
+                using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+                using (var key = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\Cryptography"))
+                {
+                    if (key != null)
+                    {
+                        var value = key.GetValue("MachineGuid");
+                        if (value != null)
+                        {
+                            var guidString = value.ToString();
+                            
+                            if (!string.IsNullOrWhiteSpace(guidString))
+                            {
+                                return guidString;
+                            }
+                        }
+                    }
+                }
+                
+                return "Unavailable";
+            }
+            catch
+            {
+                return "Unavailable";
+            }
         }
 
-        // Converts Windows install date from Unix timestamp
+        // Converts Windows install date from Unix timestamp using WMI
         private static string GetInstallDate()
         {
             try
             {
+                // Try WMI first for more reliable install date
+                var query = "SELECT InstallDate FROM Win32_OperatingSystem";
+                using (var searcher = new ManagementObjectSearcher(query))
+                {
+                    foreach (ManagementObject os in searcher.Get().Cast<ManagementObject>())
+                    {
+                        var installDate = os["InstallDate"]?.ToString();
+                        if (!string.IsNullOrEmpty(installDate))
+                        {
+                            var parsedDate = ManagementDateTimeConverter.ToDateTime(installDate);
+                            return parsedDate.ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                    }
+                }
+                
+                // Fallback to registry
                 using (var key = Registry.LocalMachine.OpenSubKey(WindowsNtCurrentVersion))
                 {
                     var installDate = key?.GetValue("InstallDate");
@@ -88,11 +150,41 @@ namespace SysInfo.Core.Util
             return "Unavailable";
         }
 
-        // Returns formatted Windows version and edition name
+        // Returns formatted Windows version and edition name using WMI
         private static string GetWindowsVersion()
         {
             try
             {
+                // Try WMI first for accurate version info
+                var query = "SELECT Caption, Version FROM Win32_OperatingSystem";
+                using (var searcher = new ManagementObjectSearcher(query))
+                {
+                    foreach (ManagementObject os in searcher.Get().Cast<ManagementObject>())
+                    {
+                        var caption = os["Caption"]?.ToString();
+                        var version = os["Version"]?.ToString();
+                        
+                        if (!string.IsNullOrWhiteSpace(caption))
+                        {
+                            // Get display version from registry
+                            string displayVersion = null;
+                            try
+                            {
+                                using (var key = Registry.LocalMachine.OpenSubKey(WindowsNtCurrentVersion))
+                                {
+                                    displayVersion = key?.GetValue("DisplayVersion")?.ToString();
+                                }
+                            }
+                            catch { }
+                            
+                            if (!string.IsNullOrWhiteSpace(displayVersion))
+                                return $"{caption} ({displayVersion})";
+                            return caption;
+                        }
+                    }
+                }
+                
+                // Fallback to registry
                 using (var key = Registry.LocalMachine.OpenSubKey(WindowsNtCurrentVersion))
                 {
                     var productName = key?.GetValue("ProductName")?.ToString();
@@ -155,8 +247,7 @@ namespace SysInfo.Core.Util
                     tpmDevice.Connect();
                     var tpm = new Tpm2(tpmDevice);
                     
-                    ICapabilitiesUnion capData;
-                    tpm.GetCapability(Cap.TpmProperties, (uint)Pt.Manufacturer, 1, out capData);
+                    tpm.GetCapability(Cap.TpmProperties, (uint)Pt.Manufacturer, 1, out ICapabilitiesUnion capData);
                     
                     if (capData is TaggedTpmPropertyArray propArray && 
                         propArray.tpmProperty != null && 
@@ -278,7 +369,7 @@ namespace SysInfo.Core.Util
                 using (var searcher = new System.Management.ManagementObjectSearcher("root\\wmi", "SELECT * FROM MSFT_HardwareDmaPolicy"))
                 using (var collection = searcher.Get())
                 {
-                    foreach (System.Management.ManagementObject obj in collection)
+                    foreach (System.Management.ManagementObject obj in collection.Cast<System.Management.ManagementObject>())
                     {
                         var dmaRemapping = obj["DmaRemapping"];
                         if (dmaRemapping != null)

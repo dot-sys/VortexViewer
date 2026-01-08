@@ -31,11 +31,26 @@ namespace VortexViewer.Core
             ReportProgressForCollection(progressCallback, rawEntries.Count, JOURNAL_START, JOURNAL_END, "Reading Journals");
 
             var swMft = Stopwatch.StartNew();
-            var neededFrns = new HashSet<ulong>(
-                rawEntries.Select(e => e.FileReferenceNumber)
-                .Concat(rawEntries.Select(e => e.ParentFileReferenceNumber))
-            );
-            var mftData = MftUtil.BuildParentPathMap(driveLetter, neededFrns);
+            
+            // Build a map of FRN -> ParentFRN from journal entries
+            // This preserves the parent relationship info from the journal
+            var journalParentMap = new Dictionary<ulong, ulong>();
+            foreach (var entry in rawEntries)
+            {
+                // Map file FRN to its parent FRN
+                if (!journalParentMap.ContainsKey(entry.FileReferenceNumber))
+                {
+                    journalParentMap[entry.FileReferenceNumber] = entry.ParentFileReferenceNumber;
+                }
+                
+                // Also ensure parent FRN itself is in the map if not already
+                if (!journalParentMap.ContainsKey(entry.ParentFileReferenceNumber))
+                {
+                    journalParentMap[entry.ParentFileReferenceNumber] = 0; // Will be resolved by MFT
+                }
+            }
+            
+            var mftData = MftUtil.BuildParentPathMap(driveLetter, journalParentMap);
             swMft.Stop();
 
             var result = new JournalEntry[rawEntries.Count];
@@ -71,7 +86,9 @@ namespace VortexViewer.Core
             swTotal.Stop();
 
             var sorted = result.OrderByDescending(e => e.FileTime).ToList();
+            
             progressCallback?.Invoke(100, 100, "Ready");
+            
             return sorted;
         }
 

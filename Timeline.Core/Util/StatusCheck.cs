@@ -14,8 +14,9 @@ namespace Timeline.Core.Util
     // Appends Present/Deleted/Unknown status
     public static class StatusCheck
     {
+        // Simplified regex that focuses on drive letter or UNC paths
         private static readonly Regex WindowsPathRegex = new Regex(
-            @"(?:""?[a-zA-Z]\:|\\\\[^\\\/\:\*\?\<\>\|]+\\[^\\\/\:\*\?\<\>\|]*)\\(?:[^\\\/\:\*\?\<\>\|]+\\)*\w([^\\\/\:\*\?\<\>\|])*",
+            @"^(?:[a-zA-Z]:\\|\\\\)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase
         );
 
@@ -91,7 +92,8 @@ namespace Timeline.Core.Util
             if (string.IsNullOrEmpty(path))
                 return null;
 
-            if (!WindowsPathRegex.IsMatch(path))
+            // More robust validation: check if it's a valid Windows path
+            if (!IsValidWindowsPath(path))
                 return "Unknown";
 
             try
@@ -104,10 +106,48 @@ namespace Timeline.Core.Util
 
                 return "Deleted";
             }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                // CryptographicException thrown when accessing corrupted registry/shell bag data
+                // or when ExtensionBlocks library encounters malformed binary data
+                return "Unknown";
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Permission denied - file may exist but we can't access it
+                return "Unknown";
+            }
+            catch (System.Net.NetworkInformation.NetworkInformationException)
+            {
+                // Network path unavailable
+                return "Unknown";
+            }
+            catch (IOException)
+            {
+                // I/O error (network timeout, device not ready, etc.)
+                return "Unknown";
+            }
             catch
             {
-                return "Deleted";
+                // Don't return "Deleted" on exceptions - return "Unknown" instead
+                return "Unknown";
             }
+        }
+
+        private static bool IsValidWindowsPath(string path)
+        {
+            if (string.IsNullOrEmpty(path) || path.Length < 3)
+                return false;
+
+            // Check for drive letter path (C:\...)
+            if (char.IsLetter(path[0]) && path[1] == ':' && path[2] == '\\')
+                return true;
+
+            // Check for UNC path (\\server\share)
+            if (path.StartsWith(@"\\"))
+                return true;
+
+            return false;
         }
 
         [Obsolete("Use CheckAllPathStatusAsync instead to avoid blocking")]

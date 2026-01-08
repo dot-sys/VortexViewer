@@ -21,10 +21,28 @@ namespace Vortex.UI.Helpers
                 var cellContent = dataGrid.CurrentCell.Column?.GetCellContent(dataGrid.CurrentCell.Item);
                 if (cellContent is TextBlock textBlock)
                 {
-                    string text = textBlock.Text;
-                    if (!string.IsNullOrEmpty(text))
+                    // Get the full value from the data item instead of truncated display text
+                    var item = dataGrid.CurrentCell.Item;
+                    var columnIndex = dataGrid.CurrentCell.Column.DisplayIndex;
+                    
+                    string textToCopy = null;
+                    
+                    // Check if the item has a FullValue property (for dashboard items)
+                    var fullValueProperty = item?.GetType().GetProperty("FullValue");
+                    if (fullValueProperty != null && columnIndex == 1) // Value column is usually index 1
                     {
-                        Clipboard.SetText(text);
+                        textToCopy = fullValueProperty.GetValue(item)?.ToString();
+                    }
+                    
+                    // Fallback to the displayed text if FullValue is not available
+                    if (string.IsNullOrEmpty(textToCopy))
+                    {
+                        textToCopy = textBlock.Text;
+                    }
+                    
+                    if (!string.IsNullOrEmpty(textToCopy))
+                    {
+                        Clipboard.SetText(textToCopy);
                     }
                 }
             }
@@ -52,7 +70,20 @@ namespace Vortex.UI.Helpers
                     {
                         if (rowData.Length > 0)
                             rowData.Append("\t");
-                        rowData.Append(textBlock.Text);
+                        
+                        // Use FullValue for value column if available
+                        var columnIndex = column.DisplayIndex;
+                        var fullValueProperty = item?.GetType().GetProperty("FullValue");
+                        
+                        if (fullValueProperty != null && columnIndex == 1) // Value column
+                        {
+                            var fullValue = fullValueProperty.GetValue(item)?.ToString();
+                            rowData.Append(fullValue ?? textBlock.Text);
+                        }
+                        else
+                        {
+                            rowData.Append(textBlock.Text);
+                        }
                     }
                 }
 

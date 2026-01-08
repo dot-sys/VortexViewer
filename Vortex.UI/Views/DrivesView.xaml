@@ -26,17 +26,17 @@
 
         <!-- Tab Selection Buttons -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-            <Button Content="Overview" 
+            <Button Content="{DynamicResource Overview}" 
                     Command="{Binding SelectOverviewTabCommand}"
                     Margin="0,0,10,0"
                     Width="120"
                     Height="30"/>
-            <Button Content="Connected Drives" 
+            <Button Content="{DynamicResource ConnectedDrives}" 
                     Command="{Binding SelectConnectedDrivesTabCommand}"
                     Margin="0,0,10,0"
                     Width="140"
                     Height="30"/>
-            <Button Content="Timeline" 
+            <Button Content="{DynamicResource Timeline}" 
                     Command="{Binding SelectTimelineTabCommand}"
                     Width="120"
                     Height="30"/>
@@ -56,8 +56,8 @@
                       Margin="0,0,0,8">
                 <DataGrid.ContextMenu>
                     <ContextMenu Style="{StaticResource VortexDataGridContextMenuStyle}">
-                        <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                        <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                        <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                        <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
@@ -69,12 +69,12 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Device Name" Binding="{Binding DeviceName}" Width="250"/>
-                    <DataGridTextColumn Header="Label" Binding="{Binding Label}" Width="250"/>
-                    <DataGridTextColumn Header="Drive" Binding="{Binding Drive}" Width="60"/>
-                    <DataGridTextColumn Header="BusType" Binding="{Binding BusType}" Width="70"/>
-                    <DataGridTextColumn Header="Serial" Binding="{Binding Serial}" Width="200"/>
-                    <DataGridTextColumn Header="Unique Identifier" Binding="{Binding UniqueIdentifier}" Width="*"/>
+                    <DataGridTextColumn Header="{DynamicResource DeviceName}" Binding="{Binding DeviceName}" Width="250"/>
+                    <DataGridTextColumn Header="{DynamicResource Label}" Binding="{Binding Label}" Width="250"/>
+                    <DataGridTextColumn Header="{DynamicResource Drive}" Binding="{Binding Drive}" Width="60"/>
+                    <DataGridTextColumn Header="{DynamicResource BusType}" Binding="{Binding BusType}" Width="70"/>
+                    <DataGridTextColumn Header="{DynamicResource Serial}" Binding="{Binding Serial}" Width="200"/>
+                    <DataGridTextColumn Header="{DynamicResource UniqueIdentifier}" Binding="{Binding UniqueIdentifier}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -90,20 +90,20 @@
                       Margin="0,0,0,8">
                 <DataGrid.ContextMenu>
                     <ContextMenu Style="{StaticResource VortexDataGridContextMenuStyle}">
-                        <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                        <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                        <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                        <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Drive" Binding="{Binding Drive}" Width="60"/>
-                    <DataGridTextColumn Header="Disk#" Binding="{Binding DiskNumber}" Width="60"/>
-                    <DataGridTextColumn Header="Label" Binding="{Binding Label}" Width="120"/>
-                    <DataGridTextColumn Header="FileSystem" Binding="{Binding FileSystem}" Width="100"/>
-                    <DataGridTextColumn Header="Size" Binding="{Binding Size}" Width="120"/>
-                    <DataGridTextColumn Header="BusType" Binding="{Binding BusType}" Width="100"/>
-                    <DataGridTextColumn Header="Serial" Binding="{Binding Serial}" Width="200"/>
-                    <DataGridTextColumn Header="PartitionID" Binding="{Binding PartitionID}" Width="*"/>
-                    <DataGridTextColumn Header="FormatDate" Binding="{Binding FormatDate}" Width="150"/>
+                    <DataGridTextColumn Header="{DynamicResource Drive}" Binding="{Binding Drive}" Width="60"/>
+                    <DataGridTextColumn Header="{DynamicResource DiskNumber}" Binding="{Binding DiskNumber}" Width="60"/>
+                    <DataGridTextColumn Header="{DynamicResource Label}" Binding="{Binding Label}" Width="120"/>
+                    <DataGridTextColumn Header="{DynamicResource FileSystem}" Binding="{Binding FileSystem}" Width="100"/>
+                    <DataGridTextColumn Header="{DynamicResource Size}" Binding="{Binding Size}" Width="120"/>
+                    <DataGridTextColumn Header="{DynamicResource BusType}" Binding="{Binding BusType}" Width="100"/>
+                    <DataGridTextColumn Header="{DynamicResource Serial}" Binding="{Binding Serial}" Width="200"/>
+                    <DataGridTextColumn Header="{DynamicResource PartitionID}" Binding="{Binding PartitionID}" Width="*"/>
+                    <DataGridTextColumn Header="{DynamicResource FormatDate}" Binding="{Binding FormatDate}" Width="150"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -119,20 +119,20 @@
                       Margin="0,0,0,8">
                 <DataGrid.ContextMenu>
                     <ContextMenu Style="{StaticResource VortexDataGridContextMenuStyle}">
-                        <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                        <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                        <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                        <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="150"/>
-                    <DataGridTextColumn Header="Device Name" Binding="{Binding DeviceName}" Width="200"/>
-                    <DataGridTextColumn Header="Label" Binding="{Binding Label}" Width="120"/>
-                    <DataGridTextColumn Header="Drive" Binding="{Binding Drive}" Width="60"/>
-                    <DataGridTextColumn Header="BusType" Binding="{Binding BusType}" Width="70"/>
-                    <DataGridTextColumn Header="Serial" Binding="{Binding Serial}" Width="200"/>
-                    <DataGridTextColumn Header="Unique Identifier" Binding="{Binding VGUID}" Width="*"/>
-                    <DataGridTextColumn Header="Action" Binding="{Binding Action}" Width="180"/>
-                    <DataGridTextColumn Header="Log" Binding="{Binding Log}" Width="50"/>
+                    <DataGridTextColumn Header="{DynamicResource Timestamp}" Binding="{Binding Timestamp}" Width="150"/>
+                    <DataGridTextColumn Header="{DynamicResource DeviceName}" Binding="{Binding DeviceName}" Width="200"/>
+                    <DataGridTextColumn Header="{DynamicResource Label}" Binding="{Binding Label}" Width="120"/>
+                    <DataGridTextColumn Header="{DynamicResource Drive}" Binding="{Binding Drive}" Width="60"/>
+                    <DataGridTextColumn Header="{DynamicResource BusType}" Binding="{Binding BusType}" Width="70"/>
+                    <DataGridTextColumn Header="{DynamicResource Serial}" Binding="{Binding Serial}" Width="200"/>
+                    <DataGridTextColumn Header="{DynamicResource UniqueIdentifier}" Binding="{Binding VGUID}" Width="*"/>
+                    <DataGridTextColumn Header="{DynamicResource Action}" Binding="{Binding Action}" Width="180"/>
+                    <DataGridTextColumn Header="{DynamicResource Log}" Binding="{Binding Log}" Width="50"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
@@ -148,22 +148,17 @@
             <!-- Page info on left -->
             <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="11" 
                        Foreground="White">
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="Page: {0} / {1}">
-                        <Binding Path="CurrentPage"/>
-                        <Binding Path="TotalPages"/>
-                    </MultiBinding>
-                </TextBlock.Text>
+                <Run Text="{DynamicResource Page}"/><Run Text=" "/><Run Text="{Binding CurrentPage, Mode=OneWay}"/><Run Text=" / "/><Run Text="{Binding TotalPages, Mode=OneWay}"/>
             </TextBlock>
 
             <!-- Pagination controls on right -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="First" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
-                        ToolTip="Go to first page" FontSize="11"/>
+                <Button Content="{DynamicResource First}" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="{DynamicResource GoToFirstPage}" FontSize="11"/>
                 <Button Content="&lt;&lt;" Command="{Binding Prev5PagesCommand}" Margin="0,0,2,0" 
-                        ToolTip="Previous 5 pages" FontSize="11"/>
+                        ToolTip="{DynamicResource Previous5Pages}" FontSize="11"/>
                 <Button Content="&lt;" Command="{Binding PrevPageCommand}" Margin="0,0,2,0" 
-                        ToolTip="Previous page" FontSize="11"/>
+                        ToolTip="{DynamicResource PreviousPage}" FontSize="11"/>
                 <TextBlock VerticalAlignment="Center" Margin="4,0,4,0" FontSize="11" 
                            Foreground="White">
                     <TextBlock.Text>
@@ -174,11 +169,11 @@
                     </TextBlock.Text>
                 </TextBlock>
                 <Button Content="&gt;" Command="{Binding NextPageCommand}" Margin="2,0,0,0" 
-                        ToolTip="Next page" FontSize="11"/>
+                        ToolTip="{DynamicResource NextPage}" FontSize="11"/>
                 <Button Content="&gt;&gt;" Command="{Binding Next5PagesCommand}" Margin="2,0,0,0" 
-                        ToolTip="Next 5 pages" FontSize="11"/>
-                <Button Content="Last" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
-                        ToolTip="Go to last page" FontSize="11"/>
+                        ToolTip="{DynamicResource Next5Pages}" FontSize="11"/>
+                <Button Content="{DynamicResource Last}" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="{DynamicResource GoToLastPage}" FontSize="11"/>
             </StackPanel>
         </Grid>
     </Grid>

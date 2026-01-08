@@ -107,7 +107,7 @@ WindowStartupLocation="CenterOwner">
 
             <!-- Bottom Close Button -->
             <Grid Grid.Row="2" Margin="0,0,0,10">
-                <Button Content="Close" 
+                <Button Content="{DynamicResource Close}" 
                         Style="{StaticResource CloseButtonStyle}"
                         Click="Close_Click"
                         HorizontalAlignment="Center"/>

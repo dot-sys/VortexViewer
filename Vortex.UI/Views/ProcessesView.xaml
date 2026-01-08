@@ -49,7 +49,7 @@ Background="Transparent">
                             
                             <!-- Placeholder overlay -->
                             <TextBlock Grid.Column="0"
-                                       Text="Choose Process"
+                                       Text="{DynamicResource ChooseProcess}"
                                        Foreground="Gray"
                                        FontFamily="Consolas"
                                        Padding="7,0,0,0"
@@ -122,7 +122,7 @@ Background="Transparent">
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <!-- ComboBox dropdown background style -->
         <Style TargetType="ComboBoxItem">
             <Setter Property="Background" Value="#000000"/>
@@ -162,7 +162,7 @@ Background="Transparent">
             <StackPanel Grid.Column="0" Orientation="Vertical">
                 <!-- First row: Get Strings, Dropdown, Search -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                    <Button Content="Get Strings"
+                    <Button Content="{DynamicResource GetStrings}"
                             Command="{Binding GetStringsCommand}"
                             Width="100"
                             Height="30"
@@ -195,7 +195,7 @@ Background="Transparent">
                                  Height="30"/>
                         
                         <!-- Placeholder overlay for Search Strings -->
-                        <TextBlock Text="Search Strings (regex allowed)"
+                        <TextBlock Text="{DynamicResource SearchStrings}"
                                    Foreground="Gray"
                                    FontFamily="Consolas"
                                    Padding="9,0,0,0"
@@ -216,13 +216,13 @@ Background="Transparent">
                 </StackPanel>
                 <!-- Second row: Min/Max Length -->
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0" VerticalAlignment="Top">
-                    <Button Content="Get PCA"
+                    <Button Content="{DynamicResource GetPCA}"
                             Command="{Binding GetPCACommand}"
                             Width="100"
                             Height="30"
                             Margin="0,0,16,0"
-                            ToolTip="Extract PCA (Program Compatibility Assistant) traces from Explorer.exe, RuntimeBroker.exe, and PCASVC"/>
-                    <TextBlock Text="Min.:" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Minimum string length to extract from process memory."/>
+                            ToolTip="{DynamicResource GetPCATooltip}"/>
+                    <TextBlock Text="{DynamicResource Min}" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="{DynamicResource MinLengthTooltip}"/>
                     <TextBox x:Name="MinLengthBox"
                              Width="40"
                              Text="{Binding MinLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -231,15 +231,15 @@ Background="Transparent">
                              Background="Black"
                              VerticalAlignment="Center"
                              Margin="0,0,16,0"
-                             ToolTip="Minimum string length to extract from process memory."/>
-                    <TextBlock Text="Max.:" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Maximum string length to extract. Leave blank or use ∞ for unlimited."/>
+                             ToolTip="{DynamicResource MinLengthTooltip}"/>
+                    <TextBlock Text="{DynamicResource Max}" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="{DynamicResource MaxLengthTooltip}"/>
                     <TextBox x:Name="MaxLengthBox"
                              Width="60"
                              Text="{Binding MaxLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              SpellCheck.IsEnabled="False"
                              TextWrapping="Wrap"
                              VerticalAlignment="Center"
-                             ToolTip="Maximum string length to extract. Leave blank or use ∞ for unlimited.">
+                             ToolTip="{DynamicResource MaxLengthTooltip}">
                         <TextBox.Style>
                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                 <Style.Triggers>
@@ -263,63 +263,63 @@ Background="Transparent">
                         </TextBox.Style>
                     </TextBox>
                     <!-- Regex checkbox added here -->
-                    <CheckBox Content="Regex"
+                    <CheckBox Content="{DynamicResource Regex}"
                               IsChecked="{Binding IsRegexSearch, Mode=TwoWay}"
                               VerticalAlignment="Center"
                               Margin="152,0,0,0"
-                              ToolTip="Enable regex search for string filtering."/>
-                    <CheckBox Content="Starts with"
+                              ToolTip="{DynamicResource RegexTooltip}"/>
+                    <CheckBox Content="{DynamicResource StartsWith}"
                               IsChecked="{Binding IsStartsWithSearch, Mode=TwoWay}"
                               VerticalAlignment="Center"
                               Margin="38,0,0,0"
-                              ToolTip="Filter strings that start with the search text."/>
-                    <CheckBox Content="Ends with"
+                              ToolTip="{DynamicResource StartsWithTooltip}"/>
+                    <CheckBox Content="{DynamicResource EndsWith}"
                               IsChecked="{Binding IsEndsWithSearch, Mode=TwoWay}"
                               VerticalAlignment="Center"
                               Margin="38,0,0,0"
-                              ToolTip="Filter strings that end with the search text."/>
+                              ToolTip="{DynamicResource EndsWithTooltip}"/>
                 </StackPanel>
             </StackPanel>
             <!-- Right section: 3 columns, each with 2 checkboxes stacked vertically -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="32,0,0,0" VerticalAlignment="Top">
                 <!-- Left column -->
                 <StackPanel Orientation="Vertical" Margin="0,0,16,0">
-                    <CheckBox Content="Unicode Strings"
+                    <CheckBox Content="{DynamicResource UnicodeStrings}"
                               IsChecked="{Binding UnicodeStrings, Mode=TwoWay}"
                               Foreground="White"
                               Margin="0,2,0,2"
-                              ToolTip="Extracts Unicode strings from process memory." />
-                    <CheckBox Content="Combine Processes"
+                              ToolTip="{DynamicResource UnicodeStringsTooltip}" />
+                    <CheckBox Content="{DynamicResource CombineProcesses}"
                               IsChecked="{Binding CombineProcesses, Mode=TwoWay}"
                               Foreground="White"
                               Margin="0,2,0,2"
-                              ToolTip="Groups all processes with the same name and combines their results. WARNING: May be slow and use heavy resources for large processes." />
+                              ToolTip="{DynamicResource CombineProcessesTooltip}" />
                 </StackPanel>
                 <!-- Middle column -->
                 <StackPanel Orientation="Vertical" Margin="0,0,16,0">
-                    <CheckBox Content="Reduce Duplicates"
+                    <CheckBox Content="{DynamicResource ReduceDuplicates}"
                               IsChecked="{Binding ReduceDuplicates, Mode=TwoWay}"
                               Foreground="White"
                               Margin="0,2,0,2"
-                              ToolTip="Removes duplicate strings from the results." />
-                    <CheckBox Content="Reduce Nonsense strings"
+                              ToolTip="{DynamicResource ReduceDuplicatesTooltip}" />
+                    <CheckBox Content="{DynamicResource ReduceNonsenseStrings}"
                               IsChecked="{Binding ReduceNonsenseStrings, Mode=TwoWay}"
                               Foreground="White"
                               Margin="0,2,0,2"
-                              ToolTip="Filters out strings that are likely random or meaningless." />
+                              ToolTip="{DynamicResource ReduceNonsenseStringsTooltip}" />
                 </StackPanel>
                 <!-- Right column -->
                 <StackPanel Orientation="Vertical">
-                    <CheckBox Content="Win Path Strings"
+                    <CheckBox Content="{DynamicResource WinPathStrings}"
                               IsChecked="{Binding WinPathStringsFilter, Mode=TwoWay}"
                               Foreground="White"
                               Margin="0,2,0,2"
-                              ToolTip="Extracts Windows-style file paths (e.g. C:\Path\to\File.exe) from process memory." />
-                    <CheckBox Content="URL Strings"
+                              ToolTip="{DynamicResource WinPathStringsTooltip}" />
+                    <CheckBox Content="{DynamicResource URLStrings}"
                               IsChecked="{Binding UrlStringsFilter, Mode=TwoWay}"
                               Foreground="White"
                               Margin="0,2,0,2"
-                              ToolTip="Extracts web URLs (e.g. https://example.com) from process memory, following RFC 3986." />
+                              ToolTip="{DynamicResource URLStringsTooltip}" />
                 </StackPanel>
             </StackPanel>
         </Grid>
@@ -337,12 +337,12 @@ Background="Transparent">
                   SelectionUnit="FullRow">
             <DataGrid.ContextMenu>
                 <ContextMenu Style="{StaticResource VortexDataGridContextMenuStyle}">
-                    <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                    <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                    <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                    <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Stringlist" Binding="{Binding .}" Width="*" />
+                <DataGridTextColumn Header="{DynamicResource Stringlist}" Binding="{Binding .}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>
         <!-- Bottom info and pagination -->
@@ -354,46 +354,59 @@ Background="Transparent">
             </Grid.ColumnDefinitions>
             <!-- Left side: Info -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Show Process Uptimes"
+                <Button Content="{DynamicResource ShowProcessUptimes}"
                         Margin="0,0,10,0"
                         Command="{Binding ShowUptimesCommand}" 
                         VerticalAlignment="Center"/>
                 <TextBlock VerticalAlignment="Center" FontWeight="Bold" 
                            Foreground="White">
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0}/{1} Strings">
-                            <Binding Path="FilteredEntriesCount"/>
-                            <Binding Path="ExtractedStringsCount"/>
-                        </MultiBinding>
-                    </TextBlock.Text>
+                    <Run Text="{Binding FilteredEntriesCount, Mode=OneWay}"/><Run Text="/"/><Run Text="{Binding ExtractedStringsCount, Mode=OneWay}"/><Run Text=" "/><Run Text="{DynamicResource Strings}"/>
                 </TextBlock>
             </StackPanel>
 
-            <!-- Middle: Loading indicator -->
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock x:Name="LoadingTextBlock" Text="Loading" FontWeight="Bold" Foreground="White" FontSize="14"/>
-                <TextBlock x:Name="DotsTextBlock" FontWeight="Bold" Foreground="White" FontSize="14" Margin="2,0,0,0"/>
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsLoadingStrings}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsLoadingPCA}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-            </StackPanel>
+            <!-- Middle: Loading indicator with protected process overlay -->
+            <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!-- Loading text with dots animation -->
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLoadingStrings}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsLoadingPCA}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <TextBlock x:Name="LoadingTextBlock" Text="{DynamicResource Loading}" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                    <TextBlock x:Name="DotsTextBlock" FontWeight="Bold" Foreground="White" FontSize="14" Margin="2,0,0,0"/>
+                </StackPanel>
+                
+                <!-- Protected process overlay (appears OVER loading) -->
+                <Border Background="Black" Padding="10,5">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsProcessProtected}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="{DynamicResource ProcessIsProtected}" FontWeight="Bold" Foreground="Red" FontSize="14"/>
+                </Border>
+            </Grid>
 
             <!-- Right side: Pagination Controls (matching JournalView style) -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="First" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
-                        ToolTip="Go to first page" FontSize="11"/>
+                <Button Content="{DynamicResource First}" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="{DynamicResource GoToFirstPage}" FontSize="11"/>
                 <Button Content="&lt;" Command="{Binding PrevPageCommand}" Margin="0,0,2,0" 
-                        ToolTip="Previous page" FontSize="11"/>
+                        ToolTip="{DynamicResource PreviousPage}" FontSize="11"/>
                 <TextBlock VerticalAlignment="Center" Margin="4,0,4,0" FontSize="11" 
                            Foreground="White">
                     <TextBlock.Text>
@@ -404,9 +417,9 @@ Background="Transparent">
                     </TextBlock.Text>
                 </TextBlock>
                 <Button Content="&gt;" Command="{Binding NextPageCommand}" Margin="2,0,0,0" 
-                        ToolTip="Next page" FontSize="11"/>
-                <Button Content="Last" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
-                        ToolTip="Go to last page" FontSize="11"/>
+                        ToolTip="{DynamicResource NextPage}" FontSize="11"/>
+                <Button Content="{DynamicResource Last}" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="{DynamicResource GoToLastPage}" FontSize="11"/>
             </StackPanel>
         </Grid>
     </StackPanel>

@@ -15,7 +15,7 @@
 
         <!-- Title -->
         <TextBlock Grid.Row="0" 
-                   Text="System Information Dashboard" 
+                   Text="{DynamicResource SystemInformationDashboard}" 
                    FontSize="24" 
                    FontWeight="Bold"
                    Foreground="White"
@@ -32,7 +32,7 @@
 
             <!-- Hardware Information (Left) -->
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Hardware Information" 
+                <TextBlock Text="{DynamicResource HardwareInformation}" 
                            FontSize="18" 
                            FontWeight="Bold"
                            Foreground="White"
@@ -48,20 +48,20 @@
                           AutoGenerateColumns="False">
                     <DataGrid.ContextMenu>
                         <ContextMenu Style="{StaticResource VortexDataGridContextMenuStyle}">
-                            <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                            <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                            <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                            <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Property" Binding="{Binding Property}" Width="200"/>
-                        <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                        <DataGridTextColumn Header="{DynamicResource Property}" Binding="{Binding Property}" Width="200"/>
+                        <DataGridTextColumn Header="{DynamicResource Value}" Binding="{Binding Value}" Width="*"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
 
             <!-- Software Information (Right) -->
             <StackPanel Grid.Column="2">
-                <TextBlock Text="Software Information" 
+                <TextBlock Text="{DynamicResource SoftwareInformation}" 
                            FontSize="18" 
                            FontWeight="Bold"
                            Foreground="White"
@@ -77,13 +77,13 @@
                           AutoGenerateColumns="False">
                     <DataGrid.ContextMenu>
                         <ContextMenu Style="{StaticResource VortexDataGridContextMenuStyle}">
-                            <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                            <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                            <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                            <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Property" Binding="{Binding Property}" Width="200"/>
-                        <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                        <DataGridTextColumn Header="{DynamicResource Property}" Binding="{Binding Property}" Width="200"/>
+                        <DataGridTextColumn Header="{DynamicResource Value}" Binding="{Binding Value}" Width="*"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
@@ -91,7 +91,7 @@
 
         <!-- Bottom Section: Tampering Checks (Full Width) -->
         <StackPanel Grid.Row="2">
-            <TextBlock Text="Tampering Checks" 
+            <TextBlock Text="{DynamicResource TamperingChecks}" 
                        FontSize="18" 
                        FontWeight="Bold"
                        Foreground="White"
@@ -107,13 +107,13 @@
                       AutoGenerateColumns="False">
                 <DataGrid.ContextMenu>
                     <ContextMenu Style="{StaticResource VortexDataGridContextMenuStyle}">
-                        <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                        <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
+                        <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                        <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Property" Binding="{Binding Property}" Width="250"/>
-                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                    <DataGridTextColumn Header="{DynamicResource Property}" Binding="{Binding Property}" Width="250"/>
+                    <DataGridTextColumn Header="{DynamicResource Value}" Binding="{Binding Value}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </StackPanel>

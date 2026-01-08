@@ -904,8 +904,8 @@ namespace Vortex.UI.ViewModels
             if (FilterDeleted) reasonFilters.Add("Deleted");
             if (FilterRenames)
             {
-                reasonFilters.Add("RenamedFrom");
-                reasonFilters.Add("RenamedTo");
+                reasonFilters.Add("RenameFrom");
+                reasonFilters.Add("RenameTo");
             }
             if (FilterDataChanged)
                 reasonFilters.AddRange(new[] { "DataChange", "Overwrite", "Extended", "Truncation", "Basic" });
@@ -935,8 +935,8 @@ namespace Vortex.UI.ViewModels
             if (FilterDeleted) reasonFilters.Add("Deleted");
             if (FilterRenames)
             {
-                reasonFilters.Add("RenamedFrom");
-                reasonFilters.Add("RenamedTo");
+                reasonFilters.Add("RenameFrom");
+                reasonFilters.Add("RenameTo");
             }
             if (FilterDataChanged)
                 reasonFilters.AddRange(new[] { "DataChange", "Overwrite", "Extended", "Truncation", "Basic" });
@@ -994,7 +994,9 @@ namespace Vortex.UI.ViewModels
                     UsnJournalInfo info = null;
                     await Task.Run(() => info = UsnJournalApi.QueryJournal(drive));
                     if (info == null)
+                    {
                         continue;
+                    }
 
                     var driveEntries = await Task.Run(() => JournalParser.ParseJournal(drive, (current, max, stage) =>
                     {
@@ -1031,6 +1033,10 @@ namespace Vortex.UI.ViewModels
                     sorted = allEntriesList.OrderByDescending(e => e.FileTime).ToArray();
                     baseEntries = ApplyBaseFiltering(sorted);
                     reasonIndices = BuildReasonIndices(baseEntries);
+                    
+                    // Clear intermediate list - we now have our final sorted array
+                    allEntriesList.Clear();
+                    allEntriesList = null;
                 });
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>

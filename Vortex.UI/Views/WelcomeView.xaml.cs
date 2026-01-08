@@ -116,12 +116,23 @@ namespace Vortex.UI.Views
                 else
                 {
                     _dotsTimer.Stop();
-                    StatusText.Text = "All traces complete!";
+                    StatusText.Text = "All traces complete! Cleaning up memory...";
                     DotsText.Text = "";
                     
                     StopLogoSpin();
                     
                     _viewModel.IsDataLoaded = true;
+                    
+                    // Force garbage collection after all results are collected
+                    // At this point, all intermediate data structures have been converted to final results
+                    await Task.Run(() =>
+                    {
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+                        GC.WaitForPendingFinalizers();
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+                    });
+                    
+                    StatusText.Text = "All traces complete!";
                     
                     break;
                 }

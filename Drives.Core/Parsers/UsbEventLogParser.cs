@@ -40,7 +40,7 @@ namespace Drives.Core.Parsers
                 var storageVolumeEntries = ParseStorageVolumeOperationalEvents();
                 entries.AddRange(storageVolumeEntries);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -248,7 +248,7 @@ namespace Drives.Core.Parsers
 
                 return entry;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -330,7 +330,7 @@ namespace Drives.Core.Parsers
 
                 return entry;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -439,7 +439,7 @@ namespace Drives.Core.Parsers
 
                 return entry;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -502,7 +502,7 @@ namespace Drives.Core.Parsers
 
                 return entry;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }

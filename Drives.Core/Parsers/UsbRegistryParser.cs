@@ -68,7 +68,7 @@ namespace Drives.Core.Parsers
                 var wpdBusEnumEntries = ParseWpdBusEnum();
                 entries.AddRange(wpdBusEnumEntries);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -106,11 +106,9 @@ namespace Drives.Core.Parsers
                                 var entry = new UsbDeviceEntry
                                 {
                                     Action = "Partition Con/Discon",
-                                    Log = "Reg"
+                                    Log = "Reg",
+                                    Timestamp = GetRegistryKeyTimestamp(subKey)
                                 };
-
-                                // Get timestamp from registry key
-                                entry.Timestamp = GetRegistryKeyTimestamp(subKey);
 
                                 // Parse the key name
                                 // Example: ##?#USBSTOR#Disk&Ven_Intenso&Prod_Speed_Line&Rev_3.00#24080593020024&0#{53f56307-b6bf-11d0-94f2-00a0c91efb8b}
@@ -161,14 +159,14 @@ namespace Drives.Core.Parsers
                                 entries.Add(entry);
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // Skip problematic entries
                         }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -224,11 +222,9 @@ namespace Drives.Core.Parsers
                                         var entry = new UsbDeviceEntry
                                         {
                                             Action = "Device Connection",
-                                            Log = "Reg"
+                                            Log = "Reg",
+                                            Timestamp = GetRegistryKeyTimestamp(serialSubKey)
                                         };
-
-                                        // Get timestamp from registry key
-                                        entry.Timestamp = GetRegistryKeyTimestamp(serialSubKey);
 
                                         // Remove &0 suffix from serial
                                         entry.Serial = serialKey.Split('&')[0];
@@ -250,14 +246,14 @@ namespace Drives.Core.Parsers
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // Skip problematic entries
                         }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -353,14 +349,14 @@ namespace Drives.Core.Parsers
 
                             entries.Add(entry);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // Skip problematic entries
                         }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -413,14 +409,14 @@ namespace Drives.Core.Parsers
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // Skip problematic entries
                         }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -500,14 +496,14 @@ namespace Drives.Core.Parsers
                                 entries.Add(entry);
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // Skip problematic entries
                         }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -578,14 +574,14 @@ namespace Drives.Core.Parsers
                                 entries.Add(entry);
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // Skip problematic entries
                         }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -611,8 +607,6 @@ namespace Drives.Core.Parsers
 
                     foreach (string subKeyName in subKeyNames)
                     {
-                        if (subKeyName.IndexOf("USBSTOR", StringComparison.OrdinalIgnoreCase) < 0) continue;
-
                         try
                         {
                             using (var subKey = key.OpenSubKey(subKeyName))
@@ -621,56 +615,43 @@ namespace Drives.Core.Parsers
 
                                 var entry = new UsbDeviceEntry
                                 {
-                                    Action = "Connection",
+                                    Action = "Device Enumeration",
                                     Log = "Reg",
                                     Timestamp = GetRegistryKeyTimestamp(subKey)
                                 };
 
                                 // Parse subkey name
-                                // Example: _??_USBSTOR#Disk&Ven_Intenso&Prod_Speed_Line&Rev_3.00#24080593020024&0#{53f56307-b6bf-11d0-94f2-00a0c91efb8b}
+                                // Example: {GUID}#description or just description
                                 var parts = subKeyName.Split(new[] { '#', '&' }, StringSplitOptions.RemoveEmptyEntries);
-                                
+
                                 string vendor = "";
                                 string product = "";
-                                string serial = "";
                                 string vguid = "";
 
                                 for (int i = 0; i < parts.Length; i++)
                                 {
-                                    if (parts[i].StartsWith("Ven_", StringComparison.OrdinalIgnoreCase))
+                                    if (parts[i].StartsWith("VEN_", StringComparison.OrdinalIgnoreCase))
                                         vendor = parts[i].Substring(4).Replace("_", " ");
-                                    else if (parts[i].StartsWith("Prod_", StringComparison.OrdinalIgnoreCase))
+                                    else if (parts[i].StartsWith("PROD_", StringComparison.OrdinalIgnoreCase))
                                         product = parts[i].Substring(5).Replace("_", " ");
                                     else if (parts[i].StartsWith("{") && parts[i].EndsWith("}"))
                                         vguid = FormatVGUID(parts[i]);
-                                    else if (!parts[i].Equals("USBSTOR", StringComparison.OrdinalIgnoreCase) &&
-                                            !parts[i].Equals("Disk", StringComparison.OrdinalIgnoreCase) &&
-                                            !parts[i].StartsWith("Rev_", StringComparison.OrdinalIgnoreCase) &&
-                                            !parts[i].StartsWith("_??_", StringComparison.OrdinalIgnoreCase) &&
-                                            !parts[i].StartsWith("Ven_") &&
-                                            !parts[i].StartsWith("Prod_") &&
-                                            parts[i].Length > 5 &&
-                                            parts[i] != "0")
-                                    {
-                                        serial = parts[i];
-                                    }
                                 }
 
                                 entry.DeviceName = $"{vendor} {product}".Trim();
-                                entry.Serial = serial;
                                 entry.VGUID = vguid;
 
                                 entries.Add(entry);
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // Skip problematic entries
                         }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silently handle errors
             }
@@ -679,175 +660,78 @@ namespace Drives.Core.Parsers
         }
 
         /// <summary>
-        /// Ensures VGUID has curly braces
+        /// Get the last write time of a registry key
         /// </summary>
-        private static string FormatVGUID(string vguid)
-        {
-            if (string.IsNullOrEmpty(vguid))
-                return vguid;
-
-            // Remove existing braces
-            vguid = vguid.TrimStart('{').TrimEnd('}');
-
-            // Add braces back
-            return "{" + vguid + "}";
-        }
-
-        /// <summary>
-        /// Get the last write time of a registry key using Windows API
-        /// </summary>
-        private static DateTime? GetRegistryKeyTimestamp(RegistryKey key)
-        {
-            if (key == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                // Get all non-public instance fields
-                var bindingFlags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
-                var fields = typeof(RegistryKey).GetFields(bindingFlags);
-                
-                // Try common field names used in different .NET Framework versions
-                string[] possibleFieldNames = { "hkey", "_hkey", "handle", "_handle" };
-                
-                Microsoft.Win32.SafeHandles.SafeRegistryHandle safeHandle = null;
-                
-                foreach (var fieldName in possibleFieldNames)
-                {
-                    var field = typeof(RegistryKey).GetField(fieldName, bindingFlags);
-                    if (field != null)
-                    {
-                        var value = field.GetValue(key);
-                        safeHandle = value as Microsoft.Win32.SafeHandles.SafeRegistryHandle;
-                        if (safeHandle != null)
-                        {
-                            break;
-                        }
-                    }
-                }
-                
-                // If field approach failed, try property approach
-                if (safeHandle == null)
-                {
-                    var properties = typeof(RegistryKey).GetProperties(bindingFlags);
-                    string[] possiblePropNames = { "Handle", "handle", "SafeHandle", "hkey" };
-                    
-                    foreach (var propName in possiblePropNames)
-                    {
-                        var prop = typeof(RegistryKey).GetProperty(propName, bindingFlags);
-                        if (prop != null && prop.CanRead)
-                        {
-                            var value = prop.GetValue(key, null);
-                            safeHandle = value as Microsoft.Win32.SafeHandles.SafeRegistryHandle;
-                            if (safeHandle != null)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                if (safeHandle == null)
-                {
-                    return null;
-                }
-
-                if (safeHandle.IsInvalid || safeHandle.IsClosed)
-                {
-                    return null;
-                }
-
-                return GetTimestampFromHandle(safeHandle.DangerousGetHandle());
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Helper method to get timestamp from a registry handle
-        /// </summary>
-        private static DateTime? GetTimestampFromHandle(IntPtr handle)
+        private static DateTime GetRegistryKeyTimestamp(RegistryKey key)
         {
             try
             {
-                if (handle == IntPtr.Zero)
-                {
-                    return null;
-                }
-
-                // Call RegQueryInfoKey to get last write time
-                uint lpcClass = 0;
-                uint lpcSubKeys;
-                uint lpcMaxSubKeyLen;
-                uint lpcMaxClassLen;
-                uint lpcValues;
-                uint lpcMaxValueNameLen;
-                uint lpcMaxValueLen;
-                uint lpcbSecurityDescriptor;
-                long lpftLastWriteTime;
-
-                int result = RegQueryInfoKey(
-                    handle,
+                var hKey = key.Handle.DangerousGetHandle();
+                uint classSize = 0;
+                if (RegQueryInfoKey(
+                    hKey,
                     null,
-                    ref lpcClass,
+                    ref classSize,
                     IntPtr.Zero,
-                    out lpcSubKeys,
-                    out lpcMaxSubKeyLen,
-                    out lpcMaxClassLen,
-                    out lpcValues,
-                    out lpcMaxValueNameLen,
-                    out lpcMaxValueLen,
-                    out lpcbSecurityDescriptor,
-                    out lpftLastWriteTime);
-
-                if (result != 0)
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out long filetime) == 0)
                 {
-                    return null;
+                    return DateTime.FromFileTime(filetime);
                 }
-
-                // Validate the timestamp (should be positive)
-                if (lpftLastWriteTime <= 0)
-                {
-                    return null;
-                }
-
-                // Convert FILETIME (100-nanosecond intervals since January 1, 1601) to DateTime
-                DateTime timestamp = DateTime.FromFileTimeUtc(lpftLastWriteTime).ToLocalTime();
-                return timestamp;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return null;
+                // Return null timestamp if unable to get
             }
+
+            return DateTime.MinValue;
         }
 
         /// <summary>
-        /// Get device installation date from registry
+        /// Format GUID string with curly braces
         /// </summary>
-        public static DateTime? GetDeviceInstallDate(string deviceId)
+        private static string FormatVGUID(string guid)
         {
-            if (string.IsNullOrEmpty(deviceId))
-                return null;
+            if (string.IsNullOrEmpty(guid))
+                return "";
 
+            guid = guid.Trim();
+            if (!guid.StartsWith("{"))
+                guid = "{" + guid;
+            if (!guid.EndsWith("}"))
+                guid = guid + "}";
+
+            return guid.ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Get the install date of a device from its Device ID
+        /// </summary>
+        public static DateTime GetDeviceInstallDate(string deviceId)
+        {
             try
             {
                 string keyPath = $@"SYSTEM\CurrentControlSet\Enum\{deviceId}";
-                
                 using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(keyPath))
                 {
-                    if (key == null) return null;
-
-                    return GetRegistryKeyTimestamp(key);
+                    if (key != null)
+                    {
+                        return GetRegistryKeyTimestamp(key);
+                    }
                 }
             }
-            catch
+            catch (Exception)
             {
-                return null;
+                // Silently handle errors
             }
+
+            return DateTime.MinValue;
         }
     }
 }

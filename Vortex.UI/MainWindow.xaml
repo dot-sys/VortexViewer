@@ -112,25 +112,52 @@
             </Setter>
         </Style>
 
+        <!-- Language Button Style (with borders) -->
+        <Style x:Key="LanguageButtonStyle" TargetType="Button" BasedOn="{StaticResource TitleBarButtonStyle}">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="MainBorder" Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border BorderBrush="White" BorderThickness="0.6,0,0,0" IsHitTestVisible="False"/>
+                            <Border BorderBrush="#454545" BorderThickness="0,0,0.6,0" IsHitTestVisible="False"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="MainBorder" Property="Background" Value="#1f1f1f"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Refresh Button Style (with rotation animation) -->
         <Style x:Key="RefreshButtonStyle" TargetType="Button" BasedOn="{StaticResource TitleBarButtonStyle}">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="MainBorder" Background="{TemplateBinding Background}">
-                            <Image x:Name="RefreshImage" 
-                                   Source="/Assets/refresh.png" 
-                                   Width="12" 
-                                   Height="12"
-                                   RenderTransformOrigin="0.5,0.5"
-                                   RenderOptions.BitmapScalingMode="HighQuality"
-                                   RenderOptions.EdgeMode="Aliased"
-                                   >
-                                <Image.RenderTransform>
-                                    <RotateTransform x:Name="RefreshRotation" Angle="0"/>
-                                </Image.RenderTransform>
-                            </Image>
-                        </Border>
+                        <Grid>
+                            <Border x:Name="MainBorder" Background="{TemplateBinding Background}">
+                                <Image x:Name="RefreshImage" 
+                                       Source="/Assets/refresh.png" 
+                                       Width="12" 
+                                       Height="12"
+                                       RenderTransformOrigin="0.5,0.5"
+                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                       RenderOptions.EdgeMode="Aliased"
+                                       >
+                                    <Image.RenderTransform>
+                                        <RotateTransform x:Name="RefreshRotation" Angle="0"/>
+                                    </Image.RenderTransform>
+                                </Image>
+                            </Border>
+                            <Border BorderBrush="White" BorderThickness="0.6,0,0,0" IsHitTestVisible="False"/>
+                            <Border BorderBrush="#454545" BorderThickness="0,0,0.6,0" IsHitTestVisible="False"/>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="MainBorder" Property="Background" Value="#1f1f1f"/>
@@ -218,6 +245,34 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Language Menu Item Style (removes checkbox/icon area) -->
+        <Style x:Key="LanguageMenuItemStyle" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#000000"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderThickness="0"
+                                MinWidth="43">
+                            <TextBlock Text="{TemplateBinding Header}" 
+                                       Foreground="{TemplateBinding Foreground}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Consolas"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#1f1f1f"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Window.DataContext>
@@ -256,18 +311,37 @@
 
                     <!-- Window Control Buttons -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button x:Name="LanguageButton" 
+                                Content="EN" 
+                                Style="{StaticResource LanguageButtonStyle}"
+                                Click="Language_Click"
+                                ToolTip="{DynamicResource Language}">
+                            <Button.ContextMenu>
+                                <ContextMenu Background="#000000" 
+                                             BorderBrush="White" 
+                                             BorderThickness="1"
+                                             Padding="0"
+                                             MinWidth="46">
+                                    <MenuItem Header="EN" Style="{StaticResource LanguageMenuItemStyle}"/>
+                                    <MenuItem Header="DE" Style="{StaticResource LanguageMenuItemStyle}"/>
+                                    <MenuItem Header="RU" Style="{StaticResource LanguageMenuItemStyle}"/>
+                                    <MenuItem Header="ES" Style="{StaticResource LanguageMenuItemStyle}"/>
+                                    <MenuItem Header="PT" Style="{StaticResource LanguageMenuItemStyle}"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                         <Button Style="{StaticResource RefreshButtonStyle}"
                                 Click="Refresh_Click"
-                                ToolTip="Refresh"/>
+                                ToolTip="{DynamicResource Refresh}"/>
                         <Button Content="_" 
                                 Style="{StaticResource MinimizeButtonStyle}"
                                 Click="Minimize_Click"
-                                ToolTip="Minimize"/>
+                                ToolTip="{DynamicResource Minimize}"/>
                         <Button x:Name="CloseButton"
                                 Content="✕" 
                                 Style="{StaticResource CloseButtonStyle}"
                                 Click="Close_Click"
-                                ToolTip="Close"/>
+                                ToolTip="{DynamicResource Close}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -296,7 +370,7 @@
                     <Grid Width="52" Height="52" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Top"
-                          Margin="0,-27,0,0" 
+                          Margin="0,-25,0,0" 
                           Grid.Row="0"
                           ClipToBounds="False">
                         <!-- Full circle background -->
@@ -304,7 +378,7 @@
                                  Fill="#000000"
                                  RenderOptions.EdgeMode="Aliased"/>
                         <!-- Bottom half border - semicircle arc -->
-                        <Path Data="M 0,26 A 26,26 0 0 0 52,26" 
+                        <Path Data="M 0,25 A 26,26 0 0 0 52,25" 
                               Stroke="White" 
                               StrokeThickness="1" 
                               Fill="Transparent"
@@ -349,7 +423,7 @@
 
                         <!-- Journal Button (full bottom + partial sides with rounded corners) -->
                         <Grid Width="100" Height="30" Margin="0,0,5,0">
-                            <Button Content="Journal" 
+                            <Button Content="{DynamicResource Journal}" 
                                   Command="{Binding NavigateToJournalCommand}"
                                   IsEnabled="{Binding CanNavigateToJournal}"
                                   Style="{StaticResource NavigationButtonStyle}"
@@ -366,7 +440,7 @@
 
                         <!-- Processes Button (full bottom + partial sides with rounded corners) -->
                         <Grid Width="100" Height="30">
-                            <Button Content="Processes" 
+                            <Button Content="{DynamicResource Processes}" 
                                   Command="{Binding NavigateToProcessesCommand}"
                                   IsEnabled="{Binding CanNavigateToProcesses}"
                                   Style="{StaticResource NavigationButtonStyle}"
@@ -390,7 +464,7 @@
                                 Grid.Row="0">
                         <!-- Timeline Button (full bottom + partial sides with rounded corners) -->
                         <Grid Width="100" Height="30" Margin="0,0,5,0">
-                            <Button Content="Timeline" 
+                            <Button Content="{DynamicResource Timeline}" 
                                   Command="{Binding NavigateToTimelineCommand}"
                                   IsEnabled="{Binding CanNavigateToTimeline}"
                                   Style="{StaticResource NavigationButtonStyle}"
@@ -407,7 +481,7 @@
 
                         <!-- Drives Button (full bottom + partial sides with rounded corners) -->
                         <Grid Width="100" Height="30" Margin="2.5,0,0,0">
-                            <Button Content="Drives" 
+                            <Button Content="{DynamicResource Drives}" 
                                   Command="{Binding NavigateToDrivesCommand}"
                                   IsEnabled="{Binding CanNavigateToDrives}"
                                   Style="{StaticResource NavigationButtonStyle}"

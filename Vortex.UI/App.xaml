@@ -5,6 +5,11 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Language Resource Dictionary - English as default -->
+                <ResourceDictionary Source="Resources/Strings.en-US.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
             <!-- Global Font Style -->
             <Style TargetType="{x:Type Control}" x:Key="BaseControlStyle">
                 <Setter Property="FontFamily" Value="Consolas"/>
@@ -85,6 +90,16 @@
             <Style TargetType="{x:Type CheckBox}">
                 <Setter Property="FontFamily" Value="Consolas"/>
                 <Setter Property="Foreground" Value="White"/>
+            </Style>
+
+            <!-- ToolTip Style - Black background with white text -->
+            <Style TargetType="{x:Type ToolTip}">
+                <Setter Property="FontFamily" Value="Consolas"/>
+                <Setter Property="Background" Value="#000000"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderBrush" Value="#333333"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="8"/>
             </Style>
 
             <!-- ToggleButton Style - Made to look exactly like Button -->

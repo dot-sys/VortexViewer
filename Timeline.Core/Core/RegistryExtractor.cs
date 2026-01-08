@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Registry;
+using Registry.Abstractions;
 using Timeline.Core.Models;
 using Timeline.Core.Util;
 using Timeline.Core.Parsers;
@@ -141,6 +142,11 @@ namespace Timeline.Core.Core
                 var processedHives = GetProcessedHiveNames(hivePaths);
 
                 finalEntries = await EvidenceAggregator.AggregateAllEvidenceAsync(allParserResults, uppercaseResults, progress).ConfigureAwait(false);
+                
+                // Clear allParserResults - it's already been aggregated into finalEntries
+                // Note: EvidenceAggregator.AggregateAllEvidenceAsync already clears this, but be explicit
+                allParserResults.Clear();
+                allParserResults = null;
             }
             catch (OperationCanceledException)
             {
@@ -161,7 +167,9 @@ namespace Timeline.Core.Core
             var hivePathsList = hivePaths.ToList();
 
             if (hivePathsList.Count == 0)
+            {
                 return allParserResults;
+            }
 
             // Launch processing for all hives and rely on ParserSemaphore inside ProcessSingleHiveAsync to throttle
             var tasks = hivePathsList.Select(path => ProcessSingleHiveAsync(path, cancellationToken)).ToList();
@@ -181,7 +189,7 @@ namespace Timeline.Core.Core
             return allParserResults;
         }
 
-        public static async Task<ExtractionResult> ExtractFromHivesAsync(IEnumerable<string> hivePaths, IProgress<string> progress, Action<string> logAction, CancellationToken cancellationToken = default, bool uppercaseResults = true)
+        public static async Task<ExtractionResult> ExtractFromHivesAsync(IEnumerable<string> hivePaths, IProgress<string> progress, Action<string> _, CancellationToken cancellationToken = default, bool uppercaseResults = true)
         {
             var allParserResults = await ExtractFromHivesInternalAsync(hivePaths, progress, cancellationToken).ConfigureAwait(false);
             var processedHives = GetProcessedHiveNames(hivePaths);
@@ -236,6 +244,7 @@ namespace Timeline.Core.Core
                         entries.AddRange(shellbagEntries);
                         break;
                     case HiveType.SYSTEM:
+                        int beforeBAM = entries.Count;
                         await ProcessSystemHiveAsync(hive, entries, cancellationToken);
                         break;
                 }
@@ -246,7 +255,7 @@ namespace Timeline.Core.Core
             {
                 throw;
             }
-            catch (Exception)
+            catch
             {
                 return (new List<RegistryEntry>(), HiveType.SYSTEM, hivePath);
             }
@@ -263,22 +272,40 @@ namespace Timeline.Core.Core
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            string controlSet = null;
+            var controlSets = new List<string>();
             var selectKey = hive.GetKey("Select");
             if (selectKey != null)
             {
-                var currentControlSet = selectKey.Values.FirstOrDefault(v => v.ValueName == "Current");
-                if (currentControlSet != null)
+                var currentControlSet = selectKey.Values?.FirstOrDefault(v => v.ValueName == "Current");
+                if (currentControlSet != null && !string.IsNullOrEmpty(currentControlSet.ValueData))
                 {
-                    controlSet = $"ControlSet{int.Parse(currentControlSet.ValueData):D3}";
+                    try
+                    {
+                        var csName = $"ControlSet{int.Parse(currentControlSet.ValueData):D3}";
+                        controlSets.Add(csName);
+                    }
+                    catch { }
                 }
             }
 
-            if (controlSet != null)
+            if (!controlSets.Any())
+            {
+                var rootSubKeys = hive.Root?.SubKeys?.Where(k => k.KeyName.StartsWith("ControlSet", StringComparison.OrdinalIgnoreCase)).ToList();
+                if (rootSubKeys != null && rootSubKeys.Any())
+                {
+                    controlSets.AddRange(rootSubKeys.Select(k => k.KeyName).OrderByDescending(x => x));
+                }
+            }
+
+            if (!controlSets.Any())
+            {
+                controlSets.Add("ControlSet001");
+            }
+
+            foreach (var controlSet in controlSets.Take(2))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // Process BAM keys in parallel with throttling
                 var bamTasks = new List<Task<List<RegistryEntry>>>();
 
                 string bamStatePath = $@"{controlSet}\Services\bam\State\UserSettings";
@@ -299,10 +326,15 @@ namespace Timeline.Core.Core
                 {
                     var bamResults = await Task.WhenAll(bamTasks);
                     
+                    int totalBAM = 0;
                     foreach (var result in bamResults)
                     {
                         entries.AddRange(result);
+                        totalBAM += result.Count;
                     }
+                    
+                    if (bamResults.Any(r => r.Count > 0))
+                        break;
                 }
             }
         }

@@ -61,7 +61,9 @@ namespace Timeline.Core.Parsers
                     continue;
                 }
 
-                string otherInfo = item.RegIsDeleted ? "Deleted" : "";
+                // FIXED: Don't add status info for shellbags - they're historical traces
+                // Status will be determined later by FileStatusDetector if needed
+                string otherInfo = "";
 
                 var timestamps = new List<(DateTime? timestamp, string description)>
                 {
@@ -73,9 +75,9 @@ namespace Timeline.Core.Parsers
                 var validTimestamps = timestamps
                     .Where(t => t.timestamp.HasValue)
                     .Select(t => (
-                        timestamp: t.timestamp.Value,
+                        t.timestamp.Value,
                         formatted: t.timestamp.Value.ToString("yyyy-MM-dd HH:mm:ss"),
-                        description: t.description
+                        t.description
                     ))
                     .ToList();
 
@@ -91,12 +93,12 @@ namespace Timeline.Core.Parsers
                     }
                 }
 
-                foreach (var ts in uniqueTimestamps)
+                foreach (var (timestamp, _, description) in uniqueTimestamps)
                 {
                     registryEntries.Add(new RegistryEntry
                     {
-                        Timestamp = new DateTimeOffset(ts.timestamp, TimeSpan.Zero),
-                        Description = ts.description,
+                        Timestamp = new DateTimeOffset(timestamp, TimeSpan.Zero),
+                        Description = description,
                         Path = item.OutputPath,
                         OtherInfo = otherInfo,
                         Source = "Shellbag"
@@ -140,6 +142,7 @@ namespace Timeline.Core.Parsers
             foreach (var value in mruKey.Values.Where(v => int.TryParse(v.ValueName, out int tmp)))
             {
                 logAction?.Invoke($"Processing Value: Name={value.ValueName}, HasRaw={value.ValueDataRaw != null}, RawLen={(value.ValueDataRaw != null ? value.ValueDataRaw.Length : 0)}");
+                
                 try
                 {
                     byte[] rawBytes = value.ValueDataRaw;
@@ -148,20 +151,36 @@ namespace Timeline.Core.Parsers
                         logAction?.Invoke($"Skipped Value: Name={value.ValueName}, rawBytes null or too short");
                         continue;
                     }
+
+                    // INCREMENT COUNTER OUTSIDE TRY - DON'T TOUCH STATE ON EXCEPTION
                     ShellbagCounter++;
-                    var metadata = ShellBagMetadataExtractor.ExtractMetadata(rawBytes, mruKey, value.ValueName, parentPath, ShellbagCounter);
-                    if (metadata == null)
+
+                    // FULLY ISOLATE: Catch ALL exceptions from metadata extraction
+                    ShellBagMetadata metadata = null;
+                    try
                     {
-                        logAction?.Invoke($"Metadata extraction failed for Value: {value.ValueName}");
+                        metadata = ShellBagMetadataExtractor.ExtractMetadata(rawBytes, mruKey, value.ValueName, parentPath, ShellbagCounter);
+                    }
+                    catch (System.Security.Cryptography.CryptographicException)
+                    {
+                        logAction?.Invoke($"CRYPTO EXCEPTION ignored for Value: {value.ValueName}");
+                        continue;  // SKIP THIS SHELLBAG - CORRUPTED DATA
+                    }
+                    catch (Exception ex)
+                    {
+                        logAction?.Invoke($"Metadata exception for {value.ValueName}: {ex.Message}");
                         continue;
                     }
-                    if (!metadata.IsValid)
+
+                    if (metadata == null || !metadata.IsValid)
                     {
                         logAction?.Invoke($"Metadata invalid for Value: {value.ValueName}");
                         continue;
                     }
+
                     entries.Add(metadata);
                     logAction?.Invoke($"Metadata added for Value: {value.ValueName}");
+
                     string subKeyName = value.ValueName;
                     var subKey = mruKey.SubKeys.FirstOrDefault(sk => sk.KeyName == subKeyName);
                     if (subKey != null)
@@ -170,9 +189,9 @@ namespace Timeline.Core.Parsers
                         ParseBagMRURecursive(subKey, entries, metadata.AbsolutePath, depth + 1, logAction);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex)  // TOP LEVEL CATCH FOR ENTIRE LOOP ITERATION
                 {
-                    logAction?.Invoke($"Exception for Value: {value.ValueName}, ex: {ex}");
+                    logAction?.Invoke($"FATAL EXCEPTION for Value: {value.ValueName}: {ex}");
                 }
             }
         }

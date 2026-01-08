@@ -277,7 +277,9 @@ namespace Timeline.Core.Util
                 // NOTE: Path normalization removed here - will be done centrally in EvidenceAggregator
                 // metadata.OutputPath = PathCleaner.NormalizePath(metadata.OutputPath);
 
-                metadata.FolderIsDeleted = !CheckFolderExists(metadata.OutputPath);
+                // FIXED: Shellbags are historical traces - don't check folder existence
+                // Always set FolderIsDeleted to false (unknown status)
+                metadata.FolderIsDeleted = false;
             }
             catch
             {

@@ -183,19 +183,22 @@
 
         <!-- Toggle buttons row (centered, below filters) -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-            <ToggleButton Content="Show Deleted" 
+            <ToggleButton Content="{DynamicResource ShowDeleted}" 
                      IsChecked="{Binding ShowOnlyDeleted, Mode=TwoWay}"
                      Margin="0,0,4,0"/>
-            <ToggleButton Content="Show only Unknown" 
+            <ToggleButton Content="{DynamicResource ShowOnlyUnknown}" 
                      IsChecked="{Binding ShowOnlyUnknown, Mode=TwoWay}"
                      Margin="0,0,4,0"/>
-            <ToggleButton Content="Show only Exe" 
+            <ToggleButton Content="{DynamicResource ShowOnlyExe}" 
                      IsChecked="{Binding ShowOnlyExe, Mode=TwoWay}"
                      Margin="0,0,4,0"/>
-            <ToggleButton Content="Show only WinPaths" 
+            <ToggleButton Content="{DynamicResource ShowOnlyWinPaths}" 
                      IsChecked="{Binding ShowOnlyWinPaths, Mode=TwoWay}"
                      Margin="0,0,4,0"/>
-            <ToggleButton Content="Colored Results" 
+            <ToggleButton Content="{DynamicResource ShowOnlyNotSigned}" 
+                     IsChecked="{Binding ShowOnlyNotSigned, Mode=TwoWay}"
+                     Margin="0,0,4,0"/>
+            <ToggleButton Content="{DynamicResource ColoredResults}" 
                      IsChecked="{Binding ColoredResults, Mode=TwoWay}"
                      Margin="0,0,0,0"/>
         </StackPanel> 
@@ -211,7 +214,7 @@
                          Height="30"/>
                 
                 <!-- Placeholder overlay for Timestamp -->
-                <TextBlock Text="Timestamp"
+                <TextBlock Text="{DynamicResource Timestamp}"
                            Foreground="Gray"
                            FontFamily="Consolas"
                            Padding="9,0,0,0"
@@ -250,7 +253,7 @@
                 </ComboBox>
                 
                 <!-- Placeholder overlay for Description -->
-                <TextBlock Text="Filter by Description..."
+                <TextBlock Text="{DynamicResource FilterByDescription}"
                            Foreground="Gray"
                            FontFamily="Consolas"
                            Padding="7,0,0,0"
@@ -278,7 +281,7 @@
                          Height="30"/>
                 
                 <!-- Placeholder overlay for Path -->
-                <TextBlock Text="Path"
+                <TextBlock Text="{DynamicResource Path}"
                            Foreground="Gray"
                            FontFamily="Consolas"
                            Padding="9,0,0,0"
@@ -317,7 +320,7 @@
                 </ComboBox>
                 
                 <!-- Placeholder overlay for Source -->
-                <TextBlock Text="Filter by Source..."
+                <TextBlock Text="{DynamicResource FilterBySource}"
                            Foreground="Gray"
                            FontFamily="Consolas"
                            Padding="7,0,0,0"
@@ -354,18 +357,18 @@
                       ContextMenuOpening="TimelineDataGrid_ContextMenuOpening">
                 <DataGrid.ContextMenu>
                     <ContextMenu x:Name="TimelineContextMenu" Style="{StaticResource VortexDataGridContextMenuStyle}">
-                        <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                        <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
-                        <MenuItem x:Name="GoToMenuItem" Header="Go To" Click="GoTo_Click"/>
+                        <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                        <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
+                        <MenuItem x:Name="GoToMenuItem" Header="{DynamicResource GoTo}" Click="GoTo_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat='yyyy-MM-dd HH:mm:ss'}" Width="145"/>
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="150"/>
-                    <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*"/>
-                    <DataGridTextColumn Header="Modified" Binding="{Binding Modified}" Width="90"/>
-                    <DataGridTextColumn Header="Signed" Binding="{Binding Signed}" Width="90"/>
-                    <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="100"/>
+                    <DataGridTextColumn Header="{DynamicResource Timestamp}" Binding="{Binding Timestamp, StringFormat='yyyy-MM-dd HH:mm:ss'}" Width="145"/>
+                    <DataGridTextColumn Header="{DynamicResource Description}" Binding="{Binding Description}" Width="150"/>
+                    <DataGridTextColumn Header="{DynamicResource Path}" Binding="{Binding Path}" Width="*"/>
+                    <DataGridTextColumn Header="{DynamicResource Modified}" Binding="{Binding Modified}" Width="90"/>
+                    <DataGridTextColumn Header="{DynamicResource Signed}" Binding="{Binding Signed}" Width="90"/>
+                    <DataGridTextColumn Header="{DynamicResource Source}" Binding="{Binding Source}" Width="100"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
@@ -380,33 +383,28 @@
 
             <!-- Left side: Entry count, checkboxes, and info button -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Show Parse Info" 
+                <Button Content="{DynamicResource ShowParseInfo}" 
                         Command="{Binding ShowParseInfoCommand}"
                         VerticalAlignment="Center"
                         FontSize="11"
-                        ToolTip="Show entry counts per source (useful for detecting data manipulation)"/>
+                        ToolTip="{DynamicResource ShowParseInfoTooltip}"/>
                 <TextBlock VerticalAlignment="Center" FontWeight="Bold" 
                            Foreground="White"
                            Margin="8,0,0,0">
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0}/{1} Entries">
-                            <Binding Path="FilteredEntriesCount"/>
-                            <Binding Path="TotalEntries"/>
-                        </MultiBinding>
-                    </TextBlock.Text>
+                    <Run Text="{Binding FilteredEntriesCount, Mode=OneWay}"/><Run Text="/"/><Run Text="{Binding TotalEntries, Mode=OneWay}"/><Run Text=" "/><Run Text="{DynamicResource Entries}"/>
                 </TextBlock>
-                <CheckBox Content="Remove Duplicates" 
+                <CheckBox Content="{DynamicResource RemoveDuplicates}" 
                           IsChecked="{Binding RemoveDuplicates, Mode=TwoWay}"
                           VerticalAlignment="Center"
                           Foreground="White"
                           Margin="16,0,0,0"
-                          ToolTip="Filter out duplicate entries with same Timestamp and Path (Other Info is ignored)"/>
-                <CheckBox Content="Hide System32 Logs" 
+                          ToolTip="{DynamicResource RemoveDuplicatesTooltip}"/>
+                <CheckBox Content="{DynamicResource HideSystem32Logs}" 
                           IsChecked="{Binding HideSystem32Logs, Mode=TwoWay}"
                           VerticalAlignment="Center"
                           Foreground="White"
                           Margin="16,0,0,0"
-                          ToolTip="Hide all files from C:\Windows\System32\"/>
+                          ToolTip="{DynamicResource HideSystem32LogsTooltip}"/>
             </StackPanel>
 
             <!-- Spacer -->
@@ -414,12 +412,12 @@
 
             <!-- Right side: Pagination controls -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="First" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
-                        ToolTip="Go to first page" FontSize="11"/>
+                <Button Content="{DynamicResource First}" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="{DynamicResource GoToFirstPage}" FontSize="11"/>
                 <Button Content="&lt;&lt;" Command="{Binding Prev5PagesCommand}" Margin="0,0,2,0" 
-                        ToolTip="Previous 5 pages" FontSize="11"/>
+                        ToolTip="{DynamicResource Previous5Pages}" FontSize="11"/>
                 <Button Content="&lt;" Command="{Binding PrevPageCommand}" Margin="0,0,2,0" 
-                        ToolTip="Previous page" FontSize="11"/>
+                        ToolTip="{DynamicResource PreviousPage}" FontSize="11"/>
                 <TextBlock VerticalAlignment="Center" Margin="4,0,4,0" FontSize="11" 
                            Foreground="White">
                     <TextBlock.Text>
@@ -430,11 +428,11 @@
                     </TextBlock.Text>
                 </TextBlock>
                 <Button Content="&gt;" Command="{Binding NextPageCommand}" Margin="2,0,0,0" 
-                        ToolTip="Next page" FontSize="11"/>
+                        ToolTip="{DynamicResource NextPage}" FontSize="11"/>
                 <Button Content="&gt;&gt;" Command="{Binding Next5PagesCommand}" Margin="2,0,0,0" 
-                        ToolTip="Next 5 pages" FontSize="11"/>
-                <Button Content="Last" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
-                        ToolTip="Go to last page" FontSize="11"/>
+                        ToolTip="{DynamicResource Next5Pages}" FontSize="11"/>
+                <Button Content="{DynamicResource Last}" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="{DynamicResource GoToLastPage}" FontSize="11"/>
             </StackPanel>
         </Grid>
     </Grid>

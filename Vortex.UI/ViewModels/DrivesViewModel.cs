@@ -155,7 +155,7 @@ namespace Vortex.UI.ViewModels
 
         public DrivesViewModel()
         {
-            AnalyzeUsbDevicesCommand = new SimpleRelayCommand(_ => AnalyzeUsbDevicesAsync());
+            AnalyzeUsbDevicesCommand = new SimpleRelayCommand(async _ => await AnalyzeUsbDevicesAsync());
             
             SelectOverviewTabCommand = new SimpleRelayCommand(_ =>
             {
@@ -216,7 +216,7 @@ namespace Vortex.UI.ViewModels
 
         public void StartAnalysis()
         {
-            AnalyzeUsbDevicesAsync();
+            Task.Run(async () => await AnalyzeUsbDevicesAsync());
         }
 
         private int GetCurrentDatasetCount()
@@ -273,8 +273,10 @@ namespace Vortex.UI.ViewModels
             OnPropertyChanged(nameof(FilteredEntriesCount));
         }
 
-        private async void AnalyzeUsbDevicesAsync()
+        private async Task AnalyzeUsbDevicesAsync()
         {
+            if (IsLoading) return;
+            
             IsLoading = true;
             Status = "Analyzing USB devices and volumes...";
 
@@ -283,7 +285,17 @@ namespace Vortex.UI.ViewModels
                 UsbForensicsResult result = null;
                 await Task.Run(() =>
                 {
-                    result = UsbForensicsAggregator.CollectUsbForensics();
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    
+                    try
+                    {
+                        result = UsbForensicsAggregator.CollectUsbForensics();
+                    }
+                    finally
+                    {
+                        GC.Collect(0, GCCollectionMode.Optimized);
+                    }
                 });
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -325,6 +337,12 @@ namespace Vortex.UI.ViewModels
                     }
 
                     BuildDeviceOverview(result.Events, result.Volumes);
+                    
+                    // Clear intermediate result data - we now have our ViewModels
+                    result.Events.Clear();
+                    result.Volumes.Clear();
+                    result = null;
+                    
                     IsLoading = false;
                     CurrentPage = 1;
                     UpdatePage();

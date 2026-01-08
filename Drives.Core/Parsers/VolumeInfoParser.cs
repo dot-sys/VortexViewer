@@ -148,8 +148,9 @@ namespace Drives.Core.Parsers
             try
             {
                 using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive"))
+                using (var diskCollection = searcher.Get())
                 {
-                    foreach (ManagementObject disk in searcher.Get())
+                    foreach (ManagementObject disk in diskCollection)
                     {
                         try
                         {
@@ -161,23 +162,39 @@ namespace Drives.Core.Parsers
                             // Get partitions for this disk
                             using (var partSearcher = new ManagementObjectSearcher(
                                 $"ASSOCIATORS OF {{Win32_DiskDrive.DeviceID='{deviceId}'}} WHERE AssocClass = Win32_DiskDriveToDiskPartition"))
+                            using (var partitionCollection = partSearcher.Get())
                             {
-                                foreach (ManagementObject partition in partSearcher.Get())
+                                foreach (ManagementObject partition in partitionCollection)
                                 {
-                                    string partDeviceId = partition["DeviceID"]?.ToString();
-
-                                    // Get logical disks for this partition
-                                    using (var logicalSearcher = new ManagementObjectSearcher(
-                                        $"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partDeviceId}'}} WHERE AssocClass = Win32_LogicalDiskToPartition"))
+                                    try
                                     {
-                                        foreach (ManagementObject logical in logicalSearcher.Get())
+                                        string partDeviceId = partition["DeviceID"]?.ToString();
+
+                                        // Get logical disks for this partition
+                                        using (var logicalSearcher = new ManagementObjectSearcher(
+                                            $"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partDeviceId}'}} WHERE AssocClass = Win32_LogicalDiskToPartition"))
+                                        using (var logicalCollection = logicalSearcher.Get())
                                         {
-                                            string driveLetter = logical["DeviceID"]?.ToString();
-                                            if (!string.IsNullOrEmpty(driveLetter))
+                                            foreach (ManagementObject logical in logicalCollection)
                                             {
-                                                diskInfo[driveLetter] = new DiskInfo(diskNumber, interfaceType, serialNumber);
+                                                try
+                                                {
+                                                    string driveLetter = logical["DeviceID"]?.ToString();
+                                                    if (!string.IsNullOrEmpty(driveLetter))
+                                                    {
+                                                        diskInfo[driveLetter] = new DiskInfo(diskNumber, interfaceType, serialNumber);
+                                                    }
+                                                }
+                                                finally
+                                                {
+                                                    logical?.Dispose();
+                                                }
                                             }
                                         }
+                                    }
+                                    finally
+                                    {
+                                        partition?.Dispose();
                                     }
                                 }
                             }
@@ -185,6 +202,10 @@ namespace Drives.Core.Parsers
                         catch
                         {
                             // Skip problematic disks
+                        }
+                        finally
+                        {
+                            disk?.Dispose();
                         }
                     }
                 }
@@ -205,23 +226,39 @@ namespace Drives.Core.Parsers
 
                 using (var searcher = new ManagementObjectSearcher(
                     $"ASSOCIATORS OF {{Win32_LogicalDisk.DeviceID='{driveLetter}'}} WHERE AssocClass = Win32_LogicalDiskToPartition"))
+                using (var partitionCollection = searcher.Get())
                 {
-                    foreach (ManagementObject partition in searcher.Get())
+                    foreach (ManagementObject partition in partitionCollection)
                     {
-                        string partDeviceId = partition["DeviceID"]?.ToString();
-
-                        using (var diskSearcher = new ManagementObjectSearcher(
-                            $"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partDeviceId}'}} WHERE AssocClass = Win32_DiskDriveToDiskPartition"))
+                        try
                         {
-                            foreach (ManagementObject disk in diskSearcher.Get())
-                            {
-                                string deviceId = disk["DeviceID"]?.ToString();
-                                int diskNumber = Convert.ToInt32(deviceId?.Replace("\\\\.\\PHYSICALDRIVE", "") ?? "0");
-                                string interfaceType = disk["InterfaceType"]?.ToString() ?? "Unknown";
-                                string serialNumber = disk["SerialNumber"]?.ToString()?.Trim() ?? "";
+                            string partDeviceId = partition["DeviceID"]?.ToString();
 
-                                return new DiskInfo(diskNumber, interfaceType, serialNumber);
+                            using (var diskSearcher = new ManagementObjectSearcher(
+                                $"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partDeviceId}'}} WHERE AssocClass = Win32_DiskDriveToDiskPartition"))
+                            using (var diskCollection = diskSearcher.Get())
+                            {
+                                foreach (ManagementObject disk in diskCollection)
+                                {
+                                    try
+                                    {
+                                        string deviceId = disk["DeviceID"]?.ToString();
+                                        int diskNumber = Convert.ToInt32(deviceId?.Replace("\\\\.\\PHYSICALDRIVE", "") ?? "0");
+                                        string interfaceType = disk["InterfaceType"]?.ToString() ?? "Unknown";
+                                        string serialNumber = disk["SerialNumber"]?.ToString()?.Trim() ?? "";
+
+                                        return new DiskInfo(diskNumber, interfaceType, serialNumber);
+                                    }
+                                    finally
+                                    {
+                                        disk?.Dispose();
+                                    }
+                                }
                             }
+                        }
+                        finally
+                        {
+                            partition?.Dispose();
                         }
                     }
                 }

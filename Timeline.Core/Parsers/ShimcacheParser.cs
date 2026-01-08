@@ -15,7 +15,7 @@ namespace Timeline.Core.Parsers
     {
         public static async Task<List<RegistryEntry>> ParseShimcacheAsync(
             string systemHivePath, 
-            Action<string> logAction = null, 
+            Action<string> _ = null, 
             CancellationToken cancellationToken = default)
         {
             var entries = new List<RegistryEntry>(1000);
@@ -39,6 +39,11 @@ namespace Timeline.Core.Parsers
                     
                     if (appCompatCache.OperatingSystem != AppCompatCache.AppCompatCache.OperatingSystemVersion.Windows10 &&
                         appCompatCache.OperatingSystem != AppCompatCache.AppCompatCache.OperatingSystemVersion.Windows10C_11)
+                    {
+                        // OS version not in preferred list, processing anyway
+                    }
+                    
+                    if (appCompatCache.Caches == null || appCompatCache.Caches.Count == 0)
                     {
                         return;
                     }
@@ -86,7 +91,7 @@ namespace Timeline.Core.Parsers
             {
                 throw;
             }
-            catch (Exception)
+            catch
             {
                 return entries;
             }

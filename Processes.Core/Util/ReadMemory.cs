@@ -118,7 +118,8 @@ namespace Processes.Core.Util
 
                 if (processHandle == IntPtr.Zero)
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error(), $"Failed to open process with ID {processId}.");
+                    int errorCode = Marshal.GetLastWin32Error();
+                    throw new Win32Exception(errorCode, $"Failed to open process with ID {processId}.");
                 }
 
                 IntPtr currentAddress = IntPtr.Zero;
@@ -161,7 +162,11 @@ namespace Processes.Core.Util
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Win32Exception)
+            {
+                throw;
+            }
+            catch
             {
             }
             finally

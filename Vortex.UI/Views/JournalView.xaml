@@ -20,11 +20,11 @@ Background="Transparent">
         <!-- Toggle buttons -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8"
                     IsEnabled="{Binding IsNotLoading}">
-            <ToggleButton Content="Created" IsChecked="{Binding FilterCreated, Mode=TwoWay}" Margin="0,0,4,0"/>
-            <ToggleButton Content="Deleted" IsChecked="{Binding FilterDeleted, Mode=TwoWay}" Margin="0,0,4,0"/>
-            <ToggleButton Content="Renamed" IsChecked="{Binding FilterRenames, Mode=TwoWay}" Margin="0,0,4,0"/>
-            <ToggleButton Content="Data Changed" IsChecked="{Binding FilterDataChanged, Mode=TwoWay}" Margin="0,0,4,0"/>
-            <ToggleButton Content="Close" IsChecked="{Binding FilterClose, Mode=TwoWay}" Margin="0,0,0,0"/>
+            <ToggleButton Content="{DynamicResource Created}" IsChecked="{Binding FilterCreated, Mode=TwoWay}" Margin="0,0,4,0"/>
+            <ToggleButton Content="{DynamicResource Deleted}" IsChecked="{Binding FilterDeleted, Mode=TwoWay}" Margin="0,0,4,0"/>
+            <ToggleButton Content="{DynamicResource Renamed}" IsChecked="{Binding FilterRenames, Mode=TwoWay}" Margin="0,0,4,0"/>
+            <ToggleButton Content="{DynamicResource DataChanged}" IsChecked="{Binding FilterDataChanged, Mode=TwoWay}" Margin="0,0,4,0"/>
+            <ToggleButton Content="{DynamicResource Close}" IsChecked="{Binding FilterClose, Mode=TwoWay}" Margin="0,0,0,0"/>
         </StackPanel>
 
         <!-- Modern Search Bars -->
@@ -43,7 +43,7 @@ Background="Transparent">
                              Height="30"/>
                     
                     <!-- Placeholder overlay for Timestamp -->
-                    <TextBlock Text="Timestamp"
+                    <TextBlock Text="{DynamicResource Timestamp}"
                                Foreground="Gray"
                                FontFamily="Consolas"
                                Padding="9,0,0,0"
@@ -75,7 +75,7 @@ Background="Transparent">
                              Height="30"/>
                     
                     <!-- Placeholder overlay for Path -->
-                    <TextBlock Text="Path"
+                    <TextBlock Text="{DynamicResource Path}"
                                Foreground="Gray"
                                FontFamily="Consolas"
                                Padding="9,0,0,0"
@@ -107,7 +107,7 @@ Background="Transparent">
                              Height="30"/>
                     
                     <!-- Placeholder overlay for Extension -->
-                    <TextBlock Text="Extension"
+                    <TextBlock Text="{DynamicResource Extension}"
                                Foreground="Gray"
                                FontFamily="Consolas"
                                Padding="9,0,0,0"
@@ -142,9 +142,9 @@ Background="Transparent">
 
                 <DataGrid.ContextMenu>
                     <ContextMenu x:Name="JournalContextMenu" Style="{StaticResource VortexDataGridContextMenuStyle}">
-                        <MenuItem Header="Copy Value" Click="CopyValue_Click"/>
-                        <MenuItem Header="Copy Row" Click="CopyRow_Click"/>
-                        <MenuItem x:Name="GoToMenuItem" Header="Go To" Click="GoTo_Click"/>
+                        <MenuItem Header="{DynamicResource CopyValue}" Click="CopyValue_Click"/>
+                        <MenuItem Header="{DynamicResource CopyRow}" Click="CopyRow_Click"/>
+                        <MenuItem x:Name="GoToMenuItem" Header="{DynamicResource GoTo}" Click="GoTo_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
 
@@ -152,15 +152,15 @@ Background="Transparent">
                     <DataGridTextColumn
                         Width="145"
                         Binding="{Binding Timestamp}"
-                        Header="Timestamp" />
+                        Header="{DynamicResource Timestamp}" />
                     <DataGridTextColumn
                         Width="*"
                         Binding="{Binding FullPath}"
-                        Header="Path" />
+                        Header="{DynamicResource Path}" />
                     <DataGridTextColumn
                         Width="120"
                         Binding="{Binding ReasonString}"
-                        Header="Reason" />
+                        Header="{DynamicResource Reason}" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
@@ -175,36 +175,31 @@ Background="Transparent">
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Show Info" Command="{Binding ShowInfoCommand}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <Button Content="{DynamicResource ShowInfo}" Command="{Binding ShowInfoCommand}" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock VerticalAlignment="Center" FontWeight="Bold" 
                            Foreground="White">
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0}/{1} Entries">
-                            <Binding Path="FilteredEntriesCount"/>
-                            <Binding Path="TotalEntries"/>
-                        </MultiBinding>
-                    </TextBlock.Text>
+                    <Run Text="{Binding FilteredEntriesCount, Mode=OneWay}"/><Run Text="/"/><Run Text="{Binding TotalEntries, Mode=OneWay}"/><Run Text=" "/><Run Text="{DynamicResource Entries}"/>
                 </TextBlock>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0"
                         IsEnabled="{Binding IsNotLoading}">
-                <CheckBox Content="Reduce Duplicates"
+                <CheckBox Content="{DynamicResource ReduceDuplicates}"
                           IsChecked="{Binding ReduceDuplicates, Mode=TwoWay}"
                           Foreground="White"/>
-                <CheckBox Content="Filter Spamlogs" IsChecked="{Binding FilterSpamlogs, Mode=TwoWay}" Margin="10,0,0,0"/>
+                <CheckBox Content="{DynamicResource FilterSpamlogs}" IsChecked="{Binding FilterSpamlogs, Mode=TwoWay}" Margin="10,0,0,0"/>
             </StackPanel>
 
             <Grid Grid.Column="2"/>
 
             <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
                         IsEnabled="{Binding IsNotLoading}">
-                <Button Content="First" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
-                        ToolTip="Go to first page" FontSize="11"/>
+                <Button Content="{DynamicResource First}" Command="{Binding FirstPageCommand}" Margin="0,0,2,0" 
+                        ToolTip="{DynamicResource GoToFirstPage}" FontSize="11"/>
                 <Button Content="&lt;&lt;" Command="{Binding Prev5PagesCommand}" Margin="0,0,2,0" 
-                        ToolTip="Previous 5 pages" FontSize="11"/>
+                        ToolTip="{DynamicResource Previous5Pages}" FontSize="11"/>
                 <Button Content="&lt;" Command="{Binding PrevPageCommand}" Margin="0,0,2,0" 
-                        ToolTip="Previous page" FontSize="11"/>
+                        ToolTip="{DynamicResource PreviousPage}" FontSize="11"/>
                 <TextBlock VerticalAlignment="Center" Margin="4,0,4,0" FontSize="11" 
                            Foreground="White">
                     <TextBlock.Text>
@@ -215,11 +210,11 @@ Background="Transparent">
                     </TextBlock.Text>
                 </TextBlock>
                 <Button Content="&gt;" Command="{Binding NextPageCommand}" Margin="2,0,0,0" 
-                        ToolTip="Next page" FontSize="11"/>
+                        ToolTip="{DynamicResource NextPage}" FontSize="11"/>
                 <Button Content="&gt;&gt;" Command="{Binding Next5PagesCommand}" Margin="2,0,0,0" 
-                        ToolTip="Next 5 pages" FontSize="11"/>
-                <Button Content="Last" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
-                        ToolTip="Go to last page" FontSize="11"/>
+                        ToolTip="{DynamicResource Next5Pages}" FontSize="11"/>
+                <Button Content="{DynamicResource Last}" Command="{Binding LastPageCommand}" Margin="2,0,0,0" 
+                        ToolTip="{DynamicResource GoToLastPage}" FontSize="11"/>
             </StackPanel>
 
         </Grid>

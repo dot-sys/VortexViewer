@@ -31,6 +31,12 @@ namespace Vortex.UI
             InitializeComponent();
             
             this.Loaded += MainWindow_Loaded;
+            
+            // Wire up language menu item clicks
+            foreach (MenuItem item in LanguageButton.ContextMenu.Items)
+            {
+                item.Click += LanguageMenuItem_Click;
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -114,6 +120,17 @@ namespace Vortex.UI
             }
         }
 
+        // Opens language selection menu
+        private void Language_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.ContextMenu != null)
+            {
+                button.ContextMenu.PlacementTarget = button;
+                button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                button.ContextMenu.IsOpen = true;
+            }
+        }
+
         // Toggles maximize restore window state
         private void Maximize_Click(object sender, RoutedEventArgs e)
         {
@@ -164,6 +181,72 @@ namespace Vortex.UI
             };
 
             content.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+        }
+
+        // Handles language menu item selection
+        private void LanguageMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.Header is string languageCode)
+            {
+                ChangeLanguage(languageCode);
+            }
+        }
+
+        // Changes the application language
+        private void ChangeLanguage(string languageCode)
+        {
+            string resourcePath;
+            
+            switch (languageCode)
+            {
+                case "EN":
+                    resourcePath = "Resources/Strings.en-US.xaml";
+                    break;
+                case "DE":
+                    resourcePath = "Resources/Strings.de-DE.xaml";
+                    break;
+                case "RU":
+                    resourcePath = "Resources/Strings.ru-RU.xaml";
+                    break;
+                case "ES":
+                    resourcePath = "Resources/Strings.es-ES.xaml";
+                    break;
+                case "PT":
+                    resourcePath = "Resources/Strings.pt-PT.xaml";
+                    break;
+                default:
+                    resourcePath = "Resources/Strings.en-US.xaml";
+                    break;
+            }
+
+            // Find and remove the existing language resource dictionary
+            var existingLanguageDict = Application.Current.Resources.MergedDictionaries
+                .FirstOrDefault(d => d.Source != null && 
+                    (d.Source.OriginalString.Contains("Resources/Strings.") || 
+                     d.Source.OriginalString.Contains("/Resources/Strings.")));
+            
+            if (existingLanguageDict != null)
+            {
+                Application.Current.Resources.MergedDictionaries.Remove(existingLanguageDict);
+            }
+            
+            // Create and add the new language resource dictionary
+            var newDict = new ResourceDictionary 
+            { 
+                Source = new Uri(resourcePath, UriKind.Relative) 
+            };
+            
+            // Insert at the beginning to ensure it takes precedence
+            Application.Current.Resources.MergedDictionaries.Insert(0, newDict);
+            
+            // Update language button text
+            LanguageButton.Content = languageCode;
+            
+            // Reload the current view to apply the language change
+            if (DataContext is MainWindowViewModel vm)
+            {
+                vm.ReloadCurrentView();
+            }
         }
     }
 }
