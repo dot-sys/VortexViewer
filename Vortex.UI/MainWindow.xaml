@@ -325,6 +325,7 @@
                                     <MenuItem Header="EN" Style="{StaticResource LanguageMenuItemStyle}"/>
                                     <MenuItem Header="DE" Style="{StaticResource LanguageMenuItemStyle}"/>
                                     <MenuItem Header="RU" Style="{StaticResource LanguageMenuItemStyle}"/>
+                                    <MenuItem Header="UA" Style="{StaticResource LanguageMenuItemStyle}"/>
                                     <MenuItem Header="ES" Style="{StaticResource LanguageMenuItemStyle}"/>
                                     <MenuItem Header="PT" Style="{StaticResource LanguageMenuItemStyle}"/>
                                 </ContextMenu>

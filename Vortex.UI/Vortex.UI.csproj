@@ -176,6 +176,9 @@
     <Page Include="Resources\Strings.ru-RU.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Resources\Strings.ua-UA.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\DashboardView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

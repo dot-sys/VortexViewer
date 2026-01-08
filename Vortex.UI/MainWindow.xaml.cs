@@ -208,6 +208,9 @@ namespace Vortex.UI
                 case "RU":
                     resourcePath = "Resources/Strings.ru-RU.xaml";
                     break;
+                case "UA":
+                    resourcePath = "Resources/Strings.ua-UA.xaml";
+                    break;
                 case "ES":
                     resourcePath = "Resources/Strings.es-ES.xaml";
                     break;
