@@ -3,132 +3,132 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
     
     <!-- Main Window -->
-    <system:String x:Key="Language">Language</system:String>
-    <system:String x:Key="Refresh">Refresh</system:String>
-    <system:String x:Key="Minimize">Minimize</system:String>
-    <system:String x:Key="Close">Close</system:String>
+    <system:String x:Key="Language">Язык</system:String>
+    <system:String x:Key="Refresh">Обновить</system:String>
+    <system:String x:Key="Minimize">Минимализировать</system:String>
+    <system:String x:Key="Close">Закрыть</system:String>
     
     <!-- Navigation Buttons -->
-    <system:String x:Key="Journal">Journal</system:String>
-    <system:String x:Key="Processes">Processes</system:String>
-    <system:String x:Key="Timeline">Timeline</system:String>
-    <system:String x:Key="Drives">Drives</system:String>
+    <system:String x:Key="Journal">Журнал</system:String>
+    <system:String x:Key="Processes">Процессы</system:String>
+    <system:String x:Key="Timeline">Временная шкала</system:String>
+    <system:String x:Key="Drives">Диски</system:String>
     
     <!-- Welcome View -->
     <system:String x:Key="VortexViewer">Vortex Viewer</system:String>
-    <system:String x:Key="StartTrace">Start Trace</system:String>
-    <system:String x:Key="Loading">Loading</system:String>
+    <system:String x:Key="StartTrace">Начать сканирование</system:String>
+    <system:String x:Key="Loading">Загрузка</system:String>
     <system:String x:Key="ProcessIsProtected">Процесс защищен</system:String>
     
     <!-- Dashboard View -->
-    <system:String x:Key="SystemInformationDashboard">System Information Dashboard</system:String>
-    <system:String x:Key="HardwareInformation">Hardware Information</system:String>
-    <system:String x:Key="SoftwareInformation">Software Information</system:String>
-    <system:String x:Key="TamperingChecks">Tampering Checks</system:String>
-    <system:String x:Key="Property">Property</system:String>
-    <system:String x:Key="Value">Value</system:String>
+    <system:String x:Key="SystemInformationDashboard">Информация о системе</system:String>
+    <system:String x:Key="HardwareInformation">Информация о оборудовании</system:String>
+    <system:String x:Key="SoftwareInformation">Информация о программном обеспечении</system:String>
+    <system:String x:Key="TamperingChecks">Проверки на подделку</system:String>
+    <system:String x:Key="Property">Свойство</system:String>
+    <system:String x:Key="Value">Значение</system:String>
     
     <!-- Journal View -->
-    <system:String x:Key="Created">Created</system:String>
-    <system:String x:Key="Deleted">Deleted</system:String>
-    <system:String x:Key="Renamed">Renamed</system:String>
-    <system:String x:Key="DataChanged">Data Changed</system:String>
-    <system:String x:Key="Timestamp">Timestamp</system:String>
-    <system:String x:Key="Path">Path</system:String>
-    <system:String x:Key="Extension">Extension</system:String>
-    <system:String x:Key="Reason">Reason</system:String>
-    <system:String x:Key="ShowInfo">Show Info</system:String>
-    <system:String x:Key="Entries">Entries</system:String>
-    <system:String x:Key="ReduceDuplicates">Reduce Duplicates</system:String>
-    <system:String x:Key="FilterSpamlogs">Filter Spamlogs</system:String>
-    <system:String x:Key="First">First</system:String>
-    <system:String x:Key="Last">Last</system:String>
-    <system:String x:Key="GoToFirstPage">Go to first page</system:String>
-    <system:String x:Key="Previous5Pages">Previous 5 pages</system:String>
-    <system:String x:Key="PreviousPage">Previous page</system:String>
-    <system:String x:Key="NextPage">Next page</system:String>
-    <system:String x:Key="Next5Pages">Next 5 pages</system:String>
-    <system:String x:Key="GoToLastPage">Go to last page</system:String>
+    <system:String x:Key="Created">Создано</system:String>
+    <system:String x:Key="Deleted">Удалено</system:String>
+    <system:String x:Key="Renamed">Переименовано</system:String>
+    <system:String x:Key="DataChanged">Данные изменены</system:String>
+    <system:String x:Key="Timestamp">Временная метка</system:String>
+    <system:String x:Key="Path">Путь</system:String>
+    <system:String x:Key="Extension">Расширение</system:String>
+    <system:String x:Key="Reason">Причина</system:String>
+    <system:String x:Key="ShowInfo">Показать информацию</system:String>
+    <system:String x:Key="Entries">Записей</system:String>
+    <system:String x:Key="ReduceDuplicates">Убрать дубликаты</system:String>
+    <system:String x:Key="FilterSpamlogs">Убрать спам-лог</system:String>
+    <system:String x:Key="First">Первая</system:String>
+    <system:String x:Key="Last">Последняя</system:String>
+    <system:String x:Key="GoToFirstPage">Перейти на первую страницу</system:String>
+    <system:String x:Key="Previous5Pages">5 предыдущих страниц</system:String>
+    <system:String x:Key="PreviousPage">Предыдущая страница</system:String>
+    <system:String x:Key="NextPage">Следующая страница</system:String>
+    <system:String x:Key="Next5Pages">5 следующих страниц</system:String>
+    <system:String x:Key="GoToLastPage">Перейти на последнюю страницу</system:String>
     
     <!-- Processes View -->
-    <system:String x:Key="GetStrings">Get Strings</system:String>
-    <system:String x:Key="ChooseProcess">Choose Process</system:String>
-    <system:String x:Key="SearchStrings">Search Strings (regex allowed)</system:String>
-    <system:String x:Key="GetPCA">Get PCA</system:String>
-    <system:String x:Key="Min">Min.:</system:String>
-    <system:String x:Key="Max">Max.:</system:String>
+    <system:String x:Key="GetStrings">Получить строки</system:String>
+    <system:String x:Key="ChooseProcess">Выбрать процесс</system:String>
+    <system:String x:Key="SearchStrings">Поиск строк (regex разрешен)</system:String>
+    <system:String x:Key="GetPCA">Получить PCA</system:String>
+    <system:String x:Key="Min">Мин.:</system:String>
+    <system:String x:Key="Max">Макс.:</system:String>
     <system:String x:Key="Regex">Regex</system:String>
-    <system:String x:Key="StartsWith">Starts with</system:String>
-    <system:String x:Key="EndsWith">Ends with</system:String>
-    <system:String x:Key="UnicodeStrings">Unicode Strings</system:String>
-    <system:String x:Key="CombineProcesses">Combine Processes</system:String>
-    <system:String x:Key="ReduceNonsenseStrings">Reduce Nonsense strings</system:String>
-    <system:String x:Key="WinPathStrings">Win Path Strings</system:String>
-    <system:String x:Key="URLStrings">URL Strings</system:String>
-    <system:String x:Key="Stringlist">Stringlist</system:String>
-    <system:String x:Key="ShowProcessUptimes">Show Process Uptimes</system:String>
-    <system:String x:Key="Strings">Strings</system:String>
-    <system:String x:Key="MinLengthTooltip">Minimum string length to extract from process memory.</system:String>
-    <system:String x:Key="MaxLengthTooltip">Maximum string length to extract. Leave blank or use ∞ for unlimited.</system:String>
-    <system:String x:Key="GetPCATooltip">Extract PCA (Program Compatibility Assistant) traces from Explorer.exe, RuntimeBroker.exe, and PCASVC</system:String>
-    <system:String x:Key="RegexTooltip">Enable regex search for string filtering.</system:String>
-    <system:String x:Key="StartsWithTooltip">Filter strings that start with the search text.</system:String>
-    <system:String x:Key="EndsWithTooltip">Filter strings that end with the search text.</system:String>
-    <system:String x:Key="UnicodeStringsTooltip">Extracts Unicode strings from process memory.</system:String>
-    <system:String x:Key="CombineProcessesTooltip">Groups all processes with the same name and combines their results. WARNING: May be slow and use heavy resources for large processes.</system:String>
-    <system:String x:Key="ReduceDuplicatesTooltip">Removes duplicate strings from the results.</system:String>
-    <system:String x:Key="ReduceNonsenseStringsTooltip">Filters out strings that are likely random or meaningless.</system:String>
-    <system:String x:Key="WinPathStringsTooltip">Extracts Windows-style file paths (e.g. C:\Path\to\File.exe) from process memory.</system:String>
-    <system:String x:Key="URLStringsTooltip">Extracts web URLs (e.g. https://example.com) from process memory, following RFC 3986.</system:String>
+    <system:String x:Key="StartsWith">Начинается с</system:String>
+    <system:String x:Key="EndsWith">Заканчивается на</system:String>
+    <system:String x:Key="UnicodeStrings">Unicode строки</system:String>
+    <system:String x:Key="CombineProcesses">Объединить процессы</system:String>
+    <system:String x:Key="ReduceNonsenseStrings">Убрать бессмысленные строки</system:String>
+    <system:String x:Key="WinPathStrings">Win Path строки</system:String>
+    <system:String x:Key="URLStrings">URL-строки</system:String>
+    <system:String x:Key="Stringlist">Список строк</system:String>
+    <system:String x:Key="ShowProcessUptimes">Показать время работы процесса</system:String>
+    <system:String x:Key="Strings">Строки</system:String>
+    <system:String x:Key="MinLengthTooltip">Минимальная длина строки для извлечения из памяти процесса.</system:String>
+    <system:String x:Key="MaxLengthTooltip">Максимальная длина строки для извлечения. Оставьте пустым или используйте ∞ для безграничного.</system:String>
+    <system:String x:Key="GetPCATooltip">Извлечь PCA (Program Compatibility Assistant) треки из Explorer.exe, RuntimeBroker.exe, и PCASVC</system:String>
+    <system:String x:Key="RegexTooltip">Включить regex поиск для фильтрации строк.</system:String>
+    <system:String x:Key="StartsWithTooltip">Фильтровать строки, которые начинаются с текста поиска.</system:String>
+    <system:String x:Key="EndsWithTooltip">Фильтровать строки, которые заканчиваются на текст поиска.</system:String>
+    <system:String x:Key="UnicodeStringsTooltip">Извлекает Unicode строки из памяти процесса.</system:String>
+    <system:String x:Key="CombineProcessesTooltip">Группирует все процессы с одним именем и объединяет их результаты. ВНИМАНИЕ: Может быть медленным и использовать большие ресурсы для больших процессов.</system:String>
+    <system:String x:Key="ReduceDuplicatesTooltip">Убирает дубликаты строк из результатов.</system:String>
+    <system:String x:Key="ReduceNonsenseStringsTooltip">Фильтрует строки, которые вероятно случайные или бессмысленные.</system:String>
+    <system:String x:Key="WinPathStringsTooltip">Извлекает Windows-стиль файловых путей (например, C:\Path\to\File.exe) из памяти процесса.</system:String>
+    <system:String x:Key="URLStringsTooltip">Извлекает web URLs (например, https://example.com) из памяти процесса, следуя RFC 3986.</system:String>
     
     <!-- Timeline View -->
-    <system:String x:Key="ShowDeleted">Show Deleted</system:String>
-    <system:String x:Key="ShowOnlyUnknown">Show Unknown</system:String>
-    <system:String x:Key="ShowOnlyExe">Show Exe</system:String>
-    <system:String x:Key="ShowOnlyWinPaths">Show WinPaths</system:String>
-    <system:String x:Key="ShowOnlyNotSigned">Show Not Signed</system:String>
-    <system:String x:Key="ColoredResults">Colored Results</system:String>
-    <system:String x:Key="FilterByDescription">Description</system:String>
-    <system:String x:Key="FilterBySource">Source</system:String>
-    <system:String x:Key="Description">Description</system:String>
-    <system:String x:Key="Modified">Modified</system:String>
-    <system:String x:Key="Signed">Signed</system:String>
-    <system:String x:Key="Source">Source</system:String>
-    <system:String x:Key="ShowParseInfo">Show Parse Info</system:String>
-    <system:String x:Key="RemoveDuplicates">Remove Duplicates</system:String>
-    <system:String x:Key="HideSystem32Logs">Hide System32 Logs</system:String>
-    <system:String x:Key="ShowParseInfoTooltip">Show entry counts per source (useful for detecting data manipulation)</system:String>
-    <system:String x:Key="RemoveDuplicatesTooltip">Filter out duplicate entries with same Timestamp and Path (Other Info is ignored)</system:String>
-    <system:String x:Key="HideSystem32LogsTooltip">Hide all files from C:\Windows\System32\</system:String>
+    <system:String x:Key="ShowDeleted">Показать удаленные</system:String>
+    <system:String x:Key="ShowOnlyUnknown">Показать неизвестные</system:String>
+    <system:String x:Key="ShowOnlyExe">Показать .exe</system:String>
+    <system:String x:Key="ShowOnlyWinPaths">Показать WinPaths</system:String>
+    <system:String x:Key="ShowOnlyNotSigned">Показать файлы без подписи</system:String>
+    <system:String x:Key="ColoredResults">Цветные результаты</system:String>
+    <system:String x:Key="FilterByDescription">Сортировать по описанию</system:String>
+    <system:String x:Key="FilterBySource">Сортировать по источнику</system:String>
+    <system:String x:Key="Description">Описание</system:String>
+    <system:String x:Key="Modified">Измененные</system:String>
+    <system:String x:Key="Signed">Подписанные</system:String>
+    <system:String x:Key="Source">Источник</system:String>
+    <system:String x:Key="ShowParseInfo">Показать информацию о парсинге</system:String>
+    <system:String x:Key="RemoveDuplicates">Убрать дубликаты</system:String>
+    <system:String x:Key="HideSystem32Logs">Скрыть System32 логи</system:String>
+    <system:String x:Key="ShowParseInfoTooltip">Показать количество записей по источнику (полезно для обнаружения манипуляции с данными)</system:String>
+    <system:String x:Key="RemoveDuplicatesTooltip">Фильтровать дубликаты записей с одинаковой временной меткой и путем (другая информация игнорируется)</system:String>
+    <system:String x:Key="HideSystem32LogsTooltip">Скрыть все файлы из C:\Windows\System32\</system:String>
     
     <!-- Drives View -->
-    <system:String x:Key="Overview">Overview</system:String>
-    <system:String x:Key="ConnectedDrives">Connected Drives</system:String>
-    <system:String x:Key="DeviceName">Device Name</system:String>
-    <system:String x:Key="Label">Label</system:String>
-    <system:String x:Key="Drive">Drive</system:String>
-    <system:String x:Key="BusType">BusType</system:String>
-    <system:String x:Key="Serial">Serial</system:String>
-    <system:String x:Key="UniqueIdentifier">Unique Identifier</system:String>
-    <system:String x:Key="DiskNumber">Disk#</system:String>
-    <system:String x:Key="FileSystem">FileSystem</system:String>
-    <system:String x:Key="Size">Size</system:String>
+    <system:String x:Key="Overview">Обзор</system:String>
+    <system:String x:Key="ConnectedDrives">Подключенные диски</system:String>
+    <system:String x:Key="DeviceName">Имя устройства</system:String>
+    <system:String x:Key="Label">Метка</system:String>
+    <system:String x:Key="Drive">Диск</system:String>
+    <system:String x:Key="BusType">Тип шины</system:String>
+    <system:String x:Key="Serial">Серийный номер</system:String>
+    <system:String x:Key="UniqueIdentifier">Уникальный идентификатор</system:String>
+    <system:String x:Key="DiskNumber">Номер диска</system:String>
+    <system:String x:Key="FileSystem">Файловая система</system:String>
+    <system:String x:Key="Size">Размер</system:String>
     <system:String x:Key="PartitionID">PartitionID</system:String>
-    <system:String x:Key="FormatDate">FormatDate</system:String>
-    <system:String x:Key="Action">Action</system:String>
-    <system:String x:Key="Log">Log</system:String>
-    <system:String x:Key="Page">Page:</system:String>
+    <system:String x:Key="FormatDate">Дата форматирования</system:String>
+    <system:String x:Key="Action">Действие</system:String>
+    <system:String x:Key="Log">Лог</system:String>
+    <system:String x:Key="Page">Страница:</system:String>
     
     <!-- Context Menu -->
-    <system:String x:Key="CopyValue">Copy Value</system:String>
-    <system:String x:Key="CopyRow">Copy Row</system:String>
-    <system:String x:Key="GoTo">Go To</system:String>
+    <system:String x:Key="CopyValue">Копировать значение</system:String>
+    <system:String x:Key="CopyRow">Копировать строку</system:String>
+    <system:String x:Key="GoTo">Перейти</system:String>
     
     <!-- Info Popup Window -->
-    <system:String x:Key="Info">Info</system:String>
+    <system:String x:Key="Info">Информация</system:String>
     
 	<!-- Error Messages -->
-	<system:String x:Key="AccessDenied">Access Denied</system:String>
-	<system:String x:Key="ProcessCannotBeOpened">This Process cannot be opened.</system:String>
+	<system:String x:Key="AccessDenied">Доступ запрещен</system:String>
+	<system:String x:Key="ProcessCannotBeOpened">Этот процесс не может быть открыт.</system:String>
     
 </ResourceDictionary>
