@@ -52,6 +52,7 @@ Parses string data directly from process memory of running processes without wri
 - **Live System Analysis**: Real-time triage without system modifications or pre-process dumping
 - **Interactive DataGrids**: Filter, sort and search results in-app
 - **Fast Triage**: Optimized for speed - complete incident response analysis in seconds
+- **Multi-Language Support**: Features various Language-Translations - EN, DE, UA, RU, ES, PT
 
 ### Requirements
 
