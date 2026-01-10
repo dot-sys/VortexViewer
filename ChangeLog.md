@@ -1,8 +1,8 @@
 #### Changelog v1.1
 ---
 ##### General
-- Added Language support for EN, DE and RU from native speakers, as well as ES and PT from AI Translation.
-Thanks to Andrew Gavrilenkov for the RU translations!
+- Added Language support for EN, DE, UA and RU from native speakers, as well as ES and PT from AI Translation.
+Thanks to [Andrew Gavrilenkov](https://github.com/Brevzor) for the RU and UA translations!
 - Fixed a problem with forcing Admin correctly at startup
 - Fixed a pixel bug with the top Logo
 - Improved Garbage Collection for Memory efficiency
