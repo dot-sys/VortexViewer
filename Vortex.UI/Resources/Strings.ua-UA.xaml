@@ -16,7 +16,7 @@
     
     <!-- Welcome View -->
     <system:String x:Key="VortexViewer">Vortex Viewer</system:String>
-    <system:String x:Key="StartTrace">Почати сканування</system:String>
+    <system:String x:Key="StartTrace">Почати</system:String>
     <system:String x:Key="Loading">Завантаження</system:String>
     <system:String x:Key="ProcessIsProtected">Процес захищено</system:String>
     
@@ -51,7 +51,7 @@
     <system:String x:Key="GoToLastPage">Перейти на останню сторінку</system:String>
     
     <!-- Processes View -->
-    <system:String x:Key="GetStrings">Отримати рядки</system:String>
+    <system:String x:Key="GetStrings">Отр. рядки</system:String>
     <system:String x:Key="ChooseProcess">Вибрати процес</system:String>
     <system:String x:Key="SearchStrings">Пошук рядків (regex дозволено)</system:String>
     <system:String x:Key="GetPCA">Отримати PCA</system:String>
@@ -110,8 +110,8 @@
     <system:String x:Key="BusType">Тип шини</system:String>
     <system:String x:Key="Serial">Серійний номер</system:String>
     <system:String x:Key="UniqueIdentifier">Унікальний ідентифікатор</system:String>
-    <system:String x:Key="DiskNumber">Номер диска</system:String>
-    <system:String x:Key="FileSystem">Файлова система</system:String>
+    <system:String x:Key="DiskNumber">ID</system:String>
+    <system:String x:Key="FileSystem">Система</system:String>
     <system:String x:Key="Size">Розмір</system:String>
     <system:String x:Key="PartitionID">PartitionID</system:String>
     <system:String x:Key="FormatDate">Дата форматування</system:String>

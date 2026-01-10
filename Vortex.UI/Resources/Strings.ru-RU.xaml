@@ -16,7 +16,7 @@
     
     <!-- Welcome View -->
     <system:String x:Key="VortexViewer">Vortex Viewer</system:String>
-    <system:String x:Key="StartTrace">Начать сканирование</system:String>
+    <system:String x:Key="StartTrace">Начать</system:String>
     <system:String x:Key="Loading">Загрузка</system:String>
     <system:String x:Key="ProcessIsProtected">Процесс защищен</system:String>
     
@@ -51,7 +51,7 @@
     <system:String x:Key="GoToLastPage">Перейти на последнюю страницу</system:String>
     
     <!-- Processes View -->
-    <system:String x:Key="GetStrings">Получить строки</system:String>
+    <system:String x:Key="GetStrings">Получ. строки</system:String>
     <system:String x:Key="ChooseProcess">Выбрать процесс</system:String>
     <system:String x:Key="SearchStrings">Поиск строк (regex разрешен)</system:String>
     <system:String x:Key="GetPCA">Получить PCA</system:String>
@@ -87,7 +87,7 @@
     <system:String x:Key="ShowOnlyExe">Показать .exe</system:String>
     <system:String x:Key="ShowOnlyWinPaths">Показать WinPaths</system:String>
     <system:String x:Key="ShowOnlyNotSigned">Показать файлы без подписи</system:String>
-    <system:String x:Key="ColoredResults">Цветные результаты</system:String>
+    <system:String x:Key="ColoredResults">Цвет. результаты</system:String>
     <system:String x:Key="FilterByDescription">Сортировать по описанию</system:String>
     <system:String x:Key="FilterBySource">Сортировать по источнику</system:String>
     <system:String x:Key="Description">Описание</system:String>
@@ -110,8 +110,8 @@
     <system:String x:Key="BusType">Тип шины</system:String>
     <system:String x:Key="Serial">Серийный номер</system:String>
     <system:String x:Key="UniqueIdentifier">Уникальный идентификатор</system:String>
-    <system:String x:Key="DiskNumber">Номер диска</system:String>
-    <system:String x:Key="FileSystem">Файловая система</system:String>
+    <system:String x:Key="DiskNumber">ID</system:String>
+    <system:String x:Key="FileSystem">Система</system:String>
     <system:String x:Key="Size">Размер</system:String>
     <system:String x:Key="PartitionID">PartitionID</system:String>
     <system:String x:Key="FormatDate">Дата форматирования</system:String>
