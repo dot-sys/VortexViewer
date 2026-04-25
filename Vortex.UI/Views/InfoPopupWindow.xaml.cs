@@ -31,14 +31,14 @@ namespace Vortex.UI.Views
                 Margin = new Thickness(5)
             };
             
-            ContentPresenter.Content = textBlock;
+            MainContentPresenter.Content = textBlock;
         }
 
         // Creates popup with UI element
         public InfoPopupWindow(string title, UIElement content) : this()
         {
             Title = title;
-            ContentPresenter.Content = content;
+            MainContentPresenter.Content = content;
         }
 
         // Closes popup window on click

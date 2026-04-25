@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-// Path normalization and interning utilities
+// Path normalization and interning logic
 namespace Timeline.Core.Util
 {
-    // Cleans and normalizes file paths
+    // Extracts and cleans filesystem paths
     public static class PathCleaner
     {
         // Use concurrent dictionaries to reduce locking and allow parallel processing
@@ -194,6 +194,7 @@ namespace Timeline.Core.Util
     }
 
     // Expands environment variable placeholders
+    // Resolves environment variable strings
     public static class EnvironmentVariableResolver
     {
         private static readonly Dictionary<string, string> _commonVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -286,6 +287,7 @@ namespace Timeline.Core.Util
     }
 
     // Resolves UWP app package paths
+    // Maps UWP packages to file paths
     public static class UwpAppResolver
     {
         private static readonly Dictionary<string, string> _knownUwpApps = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -497,6 +499,7 @@ namespace Timeline.Core.Util
     }
 
     // Resolves GUID paths to descriptions
+    // Resolves GUIDs to descriptive names
     public static class GuidPathResolver
     {
         public static string ResolveGuidPath(string path)
@@ -590,6 +593,7 @@ namespace Timeline.Core.Util
     }
 
     // Resolves volume GUIDs to drive letters
+    // Maps volume GUIDs to drives
     public static class VolumeGuidResolver
     {
         public static string ResolveVolumeGuid(string path)
@@ -656,6 +660,7 @@ namespace Timeline.Core.Util
     }
 
     // Resolves special folder placeholders
+    // Resolves shell special folder names
     public static class SpecialFolderResolver
     {
         public static string ResolveSpecialFolder(string path)
@@ -694,6 +699,7 @@ namespace Timeline.Core.Util
     }
 
     // Expands 8.3 short paths
+    // Expands 8.3 legacy file paths
     public static class ShortPathExpander
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -732,6 +738,7 @@ namespace Timeline.Core.Util
     }
 
     // Detects and cleans corrupted paths
+    // Sanitizes malformed path strings
     public static class CorruptedPathCleaner
     {
         public static string CleanPath(string path)
@@ -779,6 +786,7 @@ namespace Timeline.Core.Util
     }
 
     // Extracts Windows paths from strings
+    // Extracts filesystem paths from text
     public static class WindowsPathExtractor
     {
         private static readonly Regex WindowsPathRegex = new Regex(

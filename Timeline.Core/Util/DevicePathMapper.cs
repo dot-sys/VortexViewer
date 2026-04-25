@@ -7,7 +7,7 @@ using System.Text;
 // Device path resolution utilities
 namespace Timeline.Core.Util
 {
-    // Resolves device paths to drive letters
+    // Maps device paths to drive letters
     public static class DevicePathMapper
     {
         private static readonly Dictionary<string, string> VolumeMappings;

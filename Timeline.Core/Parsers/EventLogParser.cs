@@ -9,10 +9,10 @@ using Timeline.Core.Models;
 using Timeline.Core.Util;
 using System.Collections.Concurrent;
 
-// Windows event log parser for timeline
+// Parser for Windows event logs
 namespace Timeline.Core.Parsers
 {
-    // Single event log entry container
+    // Container for single log entry
     internal class EventLogEntry
     {
         public DateTime Timestamp { get; set; }
@@ -22,7 +22,7 @@ namespace Timeline.Core.Parsers
         public string OtherInfo { get; set; }
     }
 
-    // Extracts timeline events from event logs
+    // Logic for extracting timeline events
     public static class EventLogParser
     {
         private static readonly HashSet<string> FileExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -439,7 +439,7 @@ namespace Timeline.Core.Parsers
                 var entry = new EventLogEntry
                 {
                     Description = "Threat",
-                    Source = "Eventlog"
+                    Source = "EventLog"
                 };
 
                 var timeCreatedElement = xdoc.Descendants(ns + "TimeCreated").FirstOrDefault();

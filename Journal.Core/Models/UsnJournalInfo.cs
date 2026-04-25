@@ -1,20 +1,16 @@
-﻿// USN Journal models and data structures
+// USN Journal data structures
 namespace VortexViewer.Journal.Core.Models
 {
-    // Information about USN journal configuration
+    // Journal configuration details
     public class UsnJournalInfo
     {
-        // Drive letter of this journal
-        public string DriveLetter { get; set; }
-        // Unique identifier for this journal
+        // Unique journal identifier
         public ulong JournalId { get; set; }
-        // Maximum size journal can grow to
+        // Maximum journal growth size
         public ulong MaximumSize { get; set; }
-        // Size increment for journal expansion
+        // Size increment for expansion
         public ulong AllocationDelta { get; set; }
-        // Oldest USN in current journal
+        // Oldest sequence number
         public ulong FirstUsn { get; set; }
-        // Next USN to be written
-        public ulong NextUsn { get; set; }
     }
 }

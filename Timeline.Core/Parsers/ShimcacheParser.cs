@@ -7,10 +7,10 @@ using AppCompatCache;
 using Timeline.Core.Models;
 using Timeline.Core.Util;
 
-// Parses Application Compatibility Cache
+// Parser for Application Compatibility Cache
 namespace Timeline.Core.Parsers
 {
-    // Extracts executed program list from Shimcache
+    // Extracts execution history from Shimcache
     public static class ShimcacheParser
     {
         public static async Task<List<RegistryEntry>> ParseShimcacheAsync(
@@ -71,7 +71,7 @@ namespace Timeline.Core.Parsers
                                 var registryEntry = new RegistryEntry
                                 {
                                     Timestamp = timestamp,
-                                    Source = StringPool.InternSource("ShimCache"),
+                                    Source = StringPool.InternSource("Shimcache"),
                                     Description = StringPool.InternDescription("Run Executable"),
                                     Path = StringPool.InternPath(cacheEntry.Path ?? "(Unknown Path)"),
                                     OtherInfo = StringPool.InternOtherInfo($"Executed: {executionStatus}")

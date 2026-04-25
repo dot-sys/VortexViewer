@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Runtime.InteropServices;
 using SysInfo.Core.Models;
 
 // Anti-forensics detection and artifact analysis utilities
@@ -11,6 +12,11 @@ namespace SysInfo.Core.Util
     public static class TamperingParser
     {
         private const string DateFormat = "yyyy-MM-dd HH:mm:ss";
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern uint GetFileAttributes(string lpFileName);
+
+        private const uint INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF;
 
         // Collects all tampering indicators into single object
         public static TamperingInfo GetTamperingInfo()
@@ -51,32 +57,38 @@ namespace SysInfo.Core.Util
             return systemDrive;
         }
 
+        // Resolves System32 path with Sysnative bypass for 32-bit processes
+        private static string GetSystem32Path(string relativePath)
+        {
+            var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            var system32 = Path.Combine(windowsDir, "System32");
+            
+            // Check if we are 32-bit process on 64-bit OS (Sysnative only exists in 32-bit processes)
+            if (IntPtr.Size == 4)
+            {
+                var sysnative = Path.Combine(windowsDir, "Sysnative");
+                if (Directory.Exists(sysnative))
+                {
+                    system32 = sysnative;
+                }
+            }
+            
+            return Path.Combine(system32, relativePath);
+        }
+
         // Gets SRUM database creation date using WMI
         private static string GetSrumCreatedDate()
         {
-            var filePath = @"C:\Windows\System32\sru\SRUDB.dat";
-            
-            var result = GetFileCreationDateViaWMI(filePath);
-            if (result != null)
-            {
-                return result;
-            }
-            
-            return "Unavailable";
+            var filePath = GetSystem32Path(@"sru\SRUDB.dat");
+            return GetFileCreationDateNative(filePath);
         }
 
         // Gets AmCache creation date using WMI
         private static string GetAmCacheCreatedDate()
         {
-            var filePath = @"C:\Windows\AppCompat\Programs\Amcache.hve";
-            
-            var result = GetFileCreationDateViaWMI(filePath);
-            if (result != null)
-            {
-                return result;
-            }
-            
-            return "Unavailable";
+            var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            var filePath = Path.Combine(windowsDir, @"AppCompat\Programs\Amcache.hve");
+            return GetFileCreationDateNative(filePath);
         }
 
         // Gets Defender event log creation date using WMI
@@ -84,94 +96,35 @@ namespace SysInfo.Core.Util
         {
             try
             {
-                var query = $"SELECT * FROM CIM_DataFile WHERE Drive='C:' AND Path='\\\\Windows\\\\System32\\\\winevt\\\\Logs\\\\' AND Extension='evtx' AND FileName LIKE '%Defender%Operational%'";
-                
-                using (var searcher = new ManagementObjectSearcher(query))
+                var logDir = GetSystem32Path(@"winevt\Logs");
+                if (Directory.Exists(logDir))
                 {
-                    foreach (ManagementObject file in searcher.Get().Cast<ManagementObject>())
+                    var files = Directory.GetFiles(logDir, "*Defender*Operational*.evtx");
+                    if (files.Length > 0)
                     {
-                        var fileName = file["FileName"]?.ToString();
-                        var extension = file["Extension"]?.ToString();
-                        var fullName = $"{fileName}.{extension}";
-                        var fullPath = file["Name"]?.ToString();
-                        
-                        if (fileName != null && fileName.ToLowerInvariant().Contains("defender") && 
-                            fileName.ToLowerInvariant().Contains("operational"))
-                        {
-                            var creationDate = file["CreationDate"]?.ToString();
-                            if (!string.IsNullOrEmpty(creationDate))
-                            {
-                                var parsedDate = ManagementDateTimeConverter.ToDateTime(creationDate);
-                                var result = parsedDate.ToString(DateFormat);
-                                return result;
-                            }
-                        }
-                    }
-                }
-                
-                // Fallback: try pattern matching with broader search
-                query = "SELECT * FROM CIM_DataFile WHERE Drive='C:' AND Path='\\\\Windows\\\\System32\\\\winevt\\\\Logs\\\\' AND Extension='evtx'";
-                
-                using (var searcher = new ManagementObjectSearcher(query))
-                {
-                    foreach (ManagementObject file in searcher.Get().Cast<ManagementObject>())
-                    {
-                        var fullPath = file["Name"]?.ToString();
-                        if (fullPath != null && fullPath.ToLowerInvariant().Contains("defender") && 
-                            fullPath.ToLowerInvariant().Contains("operational"))
-                        {
-                            var creationDate = file["CreationDate"]?.ToString();
-                            if (!string.IsNullOrEmpty(creationDate))
-                            {
-                                var parsedDate = ManagementDateTimeConverter.ToDateTime(creationDate);
-                                var result = parsedDate.ToString(DateFormat);
-                                return result;
-                            }
-                        }
+                        var info = new FileInfo(files[0]);
+                        return info.CreationTime.ToString(DateFormat);
                     }
                 }
             }
-            catch
-            {
-            }
+            catch { }
             
             return "Unavailable";
         }
 
         // Gets file creation date using WMI for protected system files
-        private static string GetFileCreationDateViaWMI(string filePath)
+        private static string GetFileCreationDateNative(string filePath)
         {
             try
             {
-                // Normalize path for WMI query
-                var normalizedPath = filePath.Replace("/", "\\")
-                    .TrimStart(new char[] { '\\', 'C', ':' });
-
-                var pathParts = normalizedPath.Split('\\');
-                var fileName = Path.GetFileNameWithoutExtension(normalizedPath);
-                var extension = Path.GetExtension(normalizedPath).TrimStart('.');
-                var directory = string.Join("\\\\", pathParts.Take(pathParts.Length - 1));
-                
-                var query = $"SELECT CreationDate FROM CIM_DataFile WHERE Drive='C:' AND Path='\\\\{directory}\\\\' AND FileName='{fileName}' AND Extension='{extension}'";
-                
-                using (var searcher = new ManagementObjectSearcher(query))
+                if (GetFileAttributes(filePath) != INVALID_FILE_ATTRIBUTES)
                 {
-                    foreach (ManagementObject file in searcher.Get().Cast<ManagementObject>())
-                    {
-                        var creationDate = file["CreationDate"]?.ToString();
-                        if (!string.IsNullOrEmpty(creationDate))
-                        {
-                            var parsedDate = ManagementDateTimeConverter.ToDateTime(creationDate);
-                            return parsedDate.ToString(DateFormat);
-                        }
-                    }
+                    var info = new FileInfo(filePath);
+                    return info.CreationTime.ToString(DateFormat);
                 }
             }
-            catch
-            {
-            }
-            
-            return null;
+            catch { }
+            return "Unavailable";
         }
 
         // Finds most recent recycle bin deletion timestamp
@@ -216,24 +169,19 @@ namespace SysInfo.Core.Util
         // Checks volume shadow copy service status and finds newest snapshot
         private static string GetVolumeShadowCopiesStatus()
         {
-            var serviceStatus = "Disabled";
+            var serviceStatus = "Unknown";
             
             try
             {
-                // Check VSS service status using WMI
-                var query = "SELECT State FROM Win32_Service WHERE Name='VSS'";
-                using (var searcher = new ManagementObjectSearcher(query))
+                // Native check: system drive access for VSS artifacts
+                var sysVolInfo = Path.Combine(GetSystemDrive(), "System Volume Information");
+                if (Directory.Exists(sysVolInfo))
                 {
-                    foreach (ManagementObject service in searcher.Get().Cast<ManagementObject>())
-                    {
-                        var state = service["State"]?.ToString();
-                        
-                        if (state != null && state.Equals("Running", StringComparison.OrdinalIgnoreCase))
-                        {
-                            serviceStatus = "Enabled";
-                        }
-                        break;
-                    }
+                    serviceStatus = "Running/Active";
+                }
+                else
+                {
+                    serviceStatus = "Disabled/Inaccessible";
                 }
             }
             catch
@@ -256,41 +204,21 @@ namespace SysInfo.Core.Util
         {
             try
             {
-                // WMI query to find snap*.vhd files in System Volume Information
-                var query = "SELECT Name, CreationDate FROM CIM_DataFile WHERE Drive='C:' AND Path='\\\\System Volume Information\\\\' AND Extension='vhd' AND FileName LIKE 'snap%'";
-                
-                DateTime? newestDate = null;
-                string newestFile = null;
-                
-                using (var searcher = new ManagementObjectSearcher(query))
+                var sysVolInfo = Path.Combine(GetSystemDrive(), "System Volume Information");
+                if (Directory.Exists(sysVolInfo))
                 {
-                    foreach (ManagementObject file in searcher.Get().Cast<ManagementObject>())
+                    var files = Directory.GetFiles(sysVolInfo, "snap*.vhd");
+                    if (files.Length > 0)
                     {
-                        var fileName = file["Name"]?.ToString();
-                        var creationDate = file["CreationDate"]?.ToString();
-                        
-                        if (!string.IsNullOrEmpty(creationDate))
-                        {
-                            var parsedDate = ManagementDateTimeConverter.ToDateTime(creationDate);
-                            
-                            if (!newestDate.HasValue || parsedDate > newestDate.Value)
-                            {
-                                newestDate = parsedDate;
-                                newestFile = fileName;
-                            }
-                        }
+                        var newest = files
+                            .Select(f => new FileInfo(f))
+                            .OrderByDescending(f => f.CreationTime)
+                            .First();
+                        return newest.CreationTime.ToString(DateFormat);
                     }
                 }
-                
-                if (newestDate.HasValue)
-                {
-                    var result = newestDate.Value.ToString(DateFormat);
-                    return result;
-                }
             }
-            catch
-            {
-            }
+            catch { }
             
             return null;
         }

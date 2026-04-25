@@ -1,37 +1,33 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-// USN Journal models and data structures
+// USN Journal models
 namespace VortexViewer.Journal.Core.Models
 {
-    // Represents single USN journal record from NTFS
+    // Single USN journal record
     public struct UsnJournalEntry
     {
-        public int RecordLength { get; set; }
-        public long Usn { get; set; }
+        // Reference number of file
         public ulong FileReferenceNumber { get; set; }
+        // Reference number of parent
         public ulong ParentFileReferenceNumber { get; set; }
-        public ulong ParentEntryNumber { get; set; }
-        public uint ParentSequenceNumber { get; set; }
+        // Time stamp of entry
         public long TimeStamp { get; set; }
+        // Reason for the entry
         public uint Reason { get; set; }
+        // Attributes of the file
         public uint FileAttributes { get; set; }
+        // Name of the file
         public string FileName { get; set; }
 
-        // Pool for string interning to reduce memory
+        // Pool for file names
         private static readonly Dictionary<string, string> _fileNameInternPool = new Dictionary<string, string>(StringComparer.Ordinal);
 
-        // Parses USN record from raw byte buffer
+        // Parses USN record
         public static UsnJournalEntry Parse(byte[] buffer, int offset)
         {
-            int recordLength = BitConverter.ToInt32(buffer, offset);
-            long usn = BitConverter.ToInt64(buffer, offset + 8);
-            ulong fileReferenceNumber = BitConverter.ToUInt64(buffer, offset + 16);
-            ulong parentFileReferenceNumber = BitConverter.ToUInt64(buffer, offset + 24);
-
-            // Extract ParentEntryNumber (lower 48 bits) and ParentSequenceNumber (upper 16 bits)
-            ulong parentEntryNumber = parentFileReferenceNumber & 0x0000FFFFFFFFFFFF;
-            uint parentSequenceNumber = (uint)((parentFileReferenceNumber >> 48) & 0xFFFF);
+            ulong fileReferenceNumber = BitConverter.ToUInt64(buffer, offset + 8);
+            ulong parentFileReferenceNumber = BitConverter.ToUInt64(buffer, offset + 16);
 
             long timeStamp = BitConverter.ToInt64(buffer, offset + 32);
             uint reason = BitConverter.ToUInt32(buffer, offset + 40);
@@ -50,12 +46,8 @@ namespace VortexViewer.Journal.Core.Models
 
             return new UsnJournalEntry
             {
-                RecordLength = recordLength,
-                Usn = usn,
                 FileReferenceNumber = fileReferenceNumber,
                 ParentFileReferenceNumber = parentFileReferenceNumber,
-                ParentEntryNumber = parentEntryNumber,
-                ParentSequenceNumber = parentSequenceNumber,
                 TimeStamp = timeStamp,
                 Reason = reason,
                 FileAttributes = fileAttributes,

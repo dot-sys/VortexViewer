@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Timeline.Core.Models;
 using Timeline.Core.Util;
 
-// Timeline evidence aggregation and processing pipeline
+// Aggregates evidence from multiple sources
 namespace Timeline.Core.Core
 {
     // Combines all parser outputs into timeline
@@ -63,9 +63,27 @@ namespace Timeline.Core.Core
                 
                 foreach (var entry in finalEntries)
                 {
-                    // FIXED: Skip status/signature analysis for historical trace sources
-                    // Shellbags and Recent items are historical artifacts - status is always unknown
-                    bool isHistoricalTrace = entry.Source == "Shellbag" || entry.Source == "Recent";
+                    // Skip analysis for historical artifacts
+                    bool isHistoricalTrace = entry.Source == "Shellbag" || 
+                                             entry.Source == "Recent" || 
+                                             entry.Source == "Prefetch" || 
+                                             entry.Source == "PCA" || 
+                                             entry.Source == "Shimcache" || 
+                                             entry.Source == "Amcache" || 
+                                             entry.Source == "WER" || 
+                                             entry.Source == "EventLog" || 
+                                             entry.Source == "DetectionHistory" ||
+                                             entry.Source == "Registry" ||
+                                             entry.Source == "Run" ||
+                                             entry.Source == "UserAssist" ||
+                                             entry.Source == "RecentDocs" ||
+                                             entry.Source == "RunMRU" ||
+                                             entry.Source == "TypedPaths" ||
+                                             entry.Source == "WinRAR History" ||
+                                             entry.Source == "JumpListData" ||
+                                             entry.Source.StartsWith("CompatAssist") ||
+                                             entry.Source == "MuiCache" ||
+                                             entry.Source == "BAM";
                     
                     if (isHistoricalTrace)
                     {
@@ -86,10 +104,10 @@ namespace Timeline.Core.Core
                         
                         // Set signature information
                         entry.Signed = analysisResult.SignatureInfo.Status;
-                        entry.CN = analysisResult.SignatureInfo.CN;
-                        entry.OU = analysisResult.SignatureInfo.OU;
-                        entry.S = analysisResult.SignatureInfo.S;
-                        entry.Serial = analysisResult.SignatureInfo.Serial;
+                        entry.CN = "";
+                        entry.OU = "";
+                        entry.S = "";
+                        entry.Serial = "";
                         
                         if (!string.IsNullOrEmpty(analysisResult.PathStatus) && analysisResult.PathStatus == "Present")
                         {

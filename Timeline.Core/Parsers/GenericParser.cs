@@ -10,10 +10,10 @@ using Registry.Abstractions;
 using Timeline.Core.Models;
 using Timeline.Core.Util;
 
-// Registry timeline artifact extraction utilities
+// Registry artifact extraction logic
 namespace Timeline.Core.Parsers
 {
-    // Registry parser configuration and metadata
+    // Registry parser metadata container
     internal class RegistryParserDefinition
     {
         public string KeyPath { get; }
@@ -42,7 +42,7 @@ namespace Timeline.Core.Parsers
         }
     }
 
-    // Extracts registry artifacts for timeline analysis
+    // Main registry artifact extraction engine
     public static class GenericParser
     {
         private static readonly List<RegistryParserDefinition> ParserDefinitions;
@@ -304,9 +304,12 @@ namespace Timeline.Core.Parsers
                         var cleanPath = WindowsPathExtractor.ExtractPath(value.ValueData ?? "");
                         var normalizedPath = PathCleaner.NormalizePath(cleanPath);
 
+                        var utcTime = runKey.LastWriteTime ?? DateTimeOffset.MinValue;
+                        var localTime = utcTime.ToLocalTime();
+
                         bag.Add(new RegistryEntry
                         {
-                            Timestamp = DateTimeOffset.MinValue,
+                            Timestamp = localTime,
                             Source = "Run",
                             Description = "AutoRun",
                             Path = normalizedPath,
@@ -406,9 +409,12 @@ namespace Timeline.Core.Parsers
                             {
                                 var normalizedPath = PathCleaner.NormalizePath(pathData[0]);
 
+                                var utcTime = key.LastWriteTime ?? DateTimeOffset.MinValue;
+                                var localTime = utcTime.ToLocalTime();
+
                                 entriesBag.Add(new RegistryEntry
                                 {
-                                    Timestamp = DateTimeOffset.MinValue,
+                                    Timestamp = localTime,
                                     Source = "RunMRU",
                                     Description = "Opens a File",
                                     Path = normalizedPath,
@@ -490,9 +496,12 @@ namespace Timeline.Core.Parsers
                         if (string.IsNullOrWhiteSpace(valueName)) return;
 
                         var normalizedPath = PathCleaner.NormalizePath(valueName);
+                        var utcTime = key.LastWriteTime ?? DateTimeOffset.MinValue;
+                        var localTime = utcTime.ToLocalTime();
+
                         bag.Add(new RegistryEntry
                         {
-                            Timestamp = DateTimeOffset.MinValue,
+                            Timestamp = localTime,
                             Source = "CompatAssist",
                             Description = "Run Executable",
                             Path = normalizedPath,
@@ -627,9 +636,12 @@ namespace Timeline.Core.Parsers
 
                         var normalizedPath = PathCleaner.NormalizePath(valueName);
                         
+                        var utcTime = key.LastWriteTime ?? DateTimeOffset.MinValue;
+                        var localTime = utcTime.ToLocalTime();
+
                         bag.Add(new RegistryEntry
                         {
-                            Timestamp = DateTimeOffset.MinValue,
+                            Timestamp = localTime,
                             Source = "MuiCache",
                             Description = "Run Executable",
                             Path = normalizedPath,
@@ -659,9 +671,12 @@ namespace Timeline.Core.Parsers
                         if (!string.IsNullOrWhiteSpace(value.ValueData))
                         {
                             var normalizedPath = PathCleaner.NormalizePath(value.ValueData);
+                            var utcTime = key.LastWriteTime ?? DateTimeOffset.MinValue;
+                            var localTime = utcTime.ToLocalTime();
+
                             bag.Add(new RegistryEntry
                             {
-                                Timestamp = DateTimeOffset.MinValue,
+                                Timestamp = localTime,
                                 Source = "WinRAR History",
                                 Description = "Opens an Archive",
                                 Path = normalizedPath,
@@ -709,9 +724,12 @@ namespace Timeline.Core.Parsers
 
                         var normalizedPath = PathCleaner.NormalizePath(value.ValueData ?? "");
 
+                        var utcTime = key.LastWriteTime ?? DateTimeOffset.MinValue;
+                        var localTime = utcTime.ToLocalTime();
+
                         entriesBag.Add(new RegistryEntry
                         {
-                            Timestamp = DateTimeOffset.MinValue,
+                            Timestamp = localTime,
                             Path = normalizedPath,
                             OtherInfo = $"Value: {value.ValueName ?? ""}"
                         });

@@ -8,10 +8,10 @@ using Registry.Abstractions;
 using Timeline.Core.Models;
 using Timeline.Core.Util;
 
-// Parses Windows ShellBags from registry
+// Parser for Windows ShellBags
 namespace Timeline.Core.Parsers
 {
-    // Tracks folder access history from shellbags
+    // Extracts folder history from registry
     public static class ShellbagParser
     {
         private static readonly SemaphoreSlim ShellbagSemaphore = new SemaphoreSlim(Environment.ProcessorCount, Environment.ProcessorCount);
@@ -61,8 +61,7 @@ namespace Timeline.Core.Parsers
                     continue;
                 }
 
-                // FIXED: Don't add status info for shellbags - they're historical traces
-                // Status will be determined later by FileStatusDetector if needed
+                // Shellbags represent historical traces
                 string otherInfo = "";
 
                 var timestamps = new List<(DateTime? timestamp, string description)>
@@ -152,10 +151,10 @@ namespace Timeline.Core.Parsers
                         continue;
                     }
 
-                    // INCREMENT COUNTER OUTSIDE TRY - DON'T TOUCH STATE ON EXCEPTION
+                    // Increment counter
                     ShellbagCounter++;
 
-                    // FULLY ISOLATE: Catch ALL exceptions from metadata extraction
+                    // Isolate metadata extraction
                     ShellBagMetadata metadata = null;
                     try
                     {
@@ -164,7 +163,7 @@ namespace Timeline.Core.Parsers
                     catch (System.Security.Cryptography.CryptographicException)
                     {
                         logAction?.Invoke($"CRYPTO EXCEPTION ignored for Value: {value.ValueName}");
-                        continue;  // SKIP THIS SHELLBAG - CORRUPTED DATA
+                        // Skip corrupted data
                     }
                     catch (Exception ex)
                     {
@@ -189,7 +188,7 @@ namespace Timeline.Core.Parsers
                         ParseBagMRURecursive(subKey, entries, metadata.AbsolutePath, depth + 1, logAction);
                     }
                 }
-                catch (Exception ex)  // TOP LEVEL CATCH FOR ENTIRE LOOP ITERATION
+                catch (Exception ex)
                 {
                     logAction?.Invoke($"FATAL EXCEPTION for Value: {value.ValueName}: {ex}");
                 }

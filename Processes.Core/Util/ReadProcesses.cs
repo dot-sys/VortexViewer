@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Management;
 using Processes.Core.Models;
 
-/// Process memory analysis utilities
+// Utilities for process memory analysis
 namespace Processes.Core.Util
 {
-    /// Enumerates running processes with service details
+    // Lists running processes and service info
     public static class ReadProcesses
     {
         /// Returns all running processes with metadata

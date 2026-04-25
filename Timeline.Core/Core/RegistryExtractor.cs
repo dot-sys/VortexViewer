@@ -10,15 +10,15 @@ using Timeline.Core.Models;
 using Timeline.Core.Util;
 using Timeline.Core.Parsers;
 
-// Coordinate extraction and parsing of registry hives
+// Hive extraction and aggregation
 namespace Timeline.Core.Core
 {
-    // Orchestrate hive export, parsing, and aggregation
+    // Orchestrates registry data collection
     public static class RegistryExtractor
     {
-        // Increased flexibility: use environment CPU count to size semaphore
+        // Adaptive parser throttle
         private static readonly SemaphoreSlim ParserSemaphore = new SemaphoreSlim(Environment.ProcessorCount, Environment.ProcessorCount);
-        // Make max concurrent parsers adaptive to machine (not a compile-time const)
+        // Maximum concurrent threads
         private static readonly int MaxConcurrentParsers = Math.Max(1, Math.Min(Environment.ProcessorCount, 8));
 
         public static async Task<ExtractionResult> ExtractFromStandardLocationsAsync(IProgress<string> progress, CancellationToken cancellationToken = default, bool uppercaseResults = true)
@@ -44,12 +44,24 @@ namespace Timeline.Core.Core
                 // Run independent parsers in parallel to reduce overall runtime
                 progress?.Report("Starting background parsers...");
 
-                var prefetchTask = Task.Run(() => PrefetchParser.ParsePrefetchFiles(null), cancellationToken);
-                var pcaTask = Task.Run(() => PCAParser.ParsePCADatabase(null), cancellationToken);
-                var werTask = Task.Run(() => WERParser.ParseWERReports(null), cancellationToken);
-                var eventLogTask = Task.Run(() => EventLogParser.ParseEventLogs(null), cancellationToken);
-                var detectionTask = Task.Run(() => DetectionHistoryParser.ParseDetectionHistory(null), cancellationToken);
-                var recentItemsTask = Task.Run(() => RecentItemsParser.ParseRecentItems(null), cancellationToken);
+                // Wrap each task with robust result handling to ensure no failures drop entire result sets
+                var prefetchTask = Task.Run(() => PrefetchParser.ParsePrefetchFiles(null), cancellationToken)
+                    .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<RegistryEntry>(), TaskContinuationOptions.ExecuteSynchronously);
+                
+                var pcaTask = Task.Run(() => PCAParser.ParsePCADatabase(null), cancellationToken)
+                    .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<RegistryEntry>(), TaskContinuationOptions.ExecuteSynchronously);
+                
+                var werTask = Task.Run(() => WERParser.ParseWERReports(null), cancellationToken)
+                    .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<RegistryEntry>(), TaskContinuationOptions.ExecuteSynchronously);
+                
+                var eventLogTask = Task.Run(() => EventLogParser.ParseEventLogs(null), cancellationToken)
+                    .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<RegistryEntry>(), TaskContinuationOptions.ExecuteSynchronously);
+                
+                var detectionTask = Task.Run(() => DetectionHistoryParser.ParseDetectionHistory(null), cancellationToken)
+                    .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<RegistryEntry>(), TaskContinuationOptions.ExecuteSynchronously);
+                
+                var recentItemsTask = Task.Run(() => RecentItemsParser.ParseRecentItems(null), cancellationToken)
+                    .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<RegistryEntry>(), TaskContinuationOptions.ExecuteSynchronously);
 
                 // Shimcache depends on SYSTEM hive file path
                 string systemHivePath = null;
@@ -61,11 +73,12 @@ namespace Timeline.Core.Core
                 Task<List<RegistryEntry>> shimcacheTask;
                 if (string.IsNullOrEmpty(systemHivePath))
                 {
-                    shimcacheTask = Task.FromResult<List<RegistryEntry>>(null);
+                    shimcacheTask = Task.FromResult(new List<RegistryEntry>());
                 }
                 else
                 {
-                    shimcacheTask = ShimcacheParser.ParseShimcacheAsync(systemHivePath, null, cancellationToken);
+                    shimcacheTask = ShimcacheParser.ParseShimcacheAsync(systemHivePath, null, cancellationToken)
+                        .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<RegistryEntry>(), TaskContinuationOptions.ExecuteSynchronously);
                 }
 
                 // Amcache may or may not exist on disk
@@ -75,28 +88,30 @@ namespace Timeline.Core.Core
                 Task<List<RegistryEntry>> amcacheTask;
                 if (File.Exists(amcachePath))
                 {
-                    amcacheTask = AmcacheParser.ParseAmcacheFileAsync(amcachePath, null, cancellationToken);
+                    amcacheTask = AmcacheParser.ParseAmcacheFileAsync(amcachePath, null, cancellationToken)
+                        .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<RegistryEntry>(), TaskContinuationOptions.ExecuteSynchronously);
                 }
                 else
                 {
-                    amcacheTask = Task.FromResult<List<RegistryEntry>>(null);
+                    amcacheTask = Task.FromResult(new List<RegistryEntry>());
                 }
 
-                var allHiveResultsTask = ExtractFromHivesInternalAsync(hivePaths, progress, cancellationToken);
+                var allHiveResultsTask = ExtractFromHivesInternalAsync(hivePaths, progress, cancellationToken)
+                    .ContinueWith(t => t.Status == TaskStatus.RanToCompletion ? t.Result : new List<List<RegistryEntry>>(), TaskContinuationOptions.ExecuteSynchronously);
 
                 await Task.WhenAll(prefetchTask, pcaTask, werTask, eventLogTask, detectionTask, recentItemsTask, shimcacheTask, amcacheTask, allHiveResultsTask).ConfigureAwait(false);
 
-                var prefetchEntries = prefetchTask.Status == TaskStatus.RanToCompletion ? prefetchTask.Result : null;
-                var pcaEntries = pcaTask.Status == TaskStatus.RanToCompletion ? pcaTask.Result : null;
-                var werEntries = werTask.Status == TaskStatus.RanToCompletion ? werTask.Result : null;
-                var eventLogEntries = eventLogTask.Status == TaskStatus.RanToCompletion ? eventLogTask.Result : null;
-                var detectionHistoryEntries = detectionTask.Status == TaskStatus.RanToCompletion ? detectionTask.Result : null;
-                var recentItemsEntries = recentItemsTask.Status == TaskStatus.RanToCompletion ? recentItemsTask.Result : null;
-                var shimcacheEntries = shimcacheTask.Status == TaskStatus.RanToCompletion ? shimcacheTask.Result : null;
-                var amcacheEntries = amcacheTask.Status == TaskStatus.RanToCompletion ? amcacheTask.Result : null;
+                var prefetchEntries = await prefetchTask;
+                var pcaEntries = await pcaTask;
+                var werEntries = await werTask;
+                var eventLogEntries = await eventLogTask;
+                var detectionHistoryEntries = await detectionTask;
+                var recentItemsEntries = await recentItemsTask;
+                var shimcacheEntries = await shimcacheTask;
+                var amcacheEntries = await amcacheTask;
 
                 // Merge non-registry parser results into the master list
-                var allParserResults = allHiveResultsTask.Status == TaskStatus.RanToCompletion ? allHiveResultsTask.Result : new List<List<RegistryEntry>>();
+                var allParserResults = await allHiveResultsTask;
 
                 if (prefetchEntries != null && prefetchEntries.Count > 0)
                 {

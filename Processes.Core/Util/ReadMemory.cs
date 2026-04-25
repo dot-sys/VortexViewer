@@ -7,30 +7,30 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-/// Process memory analysis utilities
+// Utilities for process memory analysis
 namespace Processes.Core.Util
 {
-    /// Contains extracted strings and region info
+    // Extracted strings and region metadata
     public class ProcessStringsResult
     {
-        /// All extracted strings from memory
+        // Extracted strings list
         public List<string> Strings { get; set; }
-        /// Scanned memory regions metadata
+        // Memory region metadata
         public List<MemoryRegionInfo> Regions { get; set; }
     }
 
-    /// Memory region address and protection info
+    // Memory region metadata container
     public class MemoryRegionInfo
     {
-        /// Starting address of memory region
+        // Starting memory address
         public ulong BaseAddress { get; set; }
-        /// Total size of region bytes
+        // Region byte size
         public ulong Size { get; set; }
-        /// Memory protection flags hex string
+        // Memory protection hex flags
         public string Protection { get; set; }
     }
 
-    /// Reads and extracts strings from memory
+    // Methods for process memory reading
     public static class ReadMemory
     {
         /// Memory state flag for committed pages
@@ -59,19 +59,17 @@ namespace Processes.Core.Util
             public uint Type;
         }
 
-        /// Opens process handle with access rights
+        /// Native Win32 API declarations
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern IntPtr OpenProcess(
             ProcessAccessFlags processAccess,
             bool bInheritHandle,
             int processId);
 
-        /// Closes open process or kernel handle
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CloseHandle(IntPtr hObject);
 
-        /// Queries memory region information remotely
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern int VirtualQueryEx(
             IntPtr hProcess,
@@ -79,7 +77,6 @@ namespace Processes.Core.Util
             out MEMORY_BASIC_INFORMATION lpBuffer,
             uint dwLength);
 
-        /// Reads bytes from remote process memory
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool ReadProcessMemory(
             IntPtr hProcess,
@@ -87,6 +84,9 @@ namespace Processes.Core.Util
             [Out] byte[] lpBuffer,
             int dwSize,
             out int lpNumberOfBytesRead);
+
+        private static readonly byte[] SharedBuffer = new byte[64 * 1024]; // 64KB pooled buffer
+        private static readonly object BufferLock = new object();
 
         /// Asynchronously extracts strings from process memory
         public static Task<ProcessStringsResult> GetStringsFromProcessAsync(
@@ -119,7 +119,11 @@ namespace Processes.Core.Util
                 if (processHandle == IntPtr.Zero)
                 {
                     int errorCode = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(errorCode, $"Failed to open process with ID {processId}.");
+                    if (errorCode == 5) // ERROR_ACCESS_DENIED
+                    {
+                        return new ProcessStringsResult { Strings = strings, Regions = regionInfos };
+                    }
+                    throw new Win32Exception(errorCode, $"Handle error {processId}.");
                 }
 
                 IntPtr currentAddress = IntPtr.Zero;
@@ -144,13 +148,22 @@ namespace Processes.Core.Util
                             Protection = memInfo.Protect.ToString("X")
                         });
 
-                        byte[] buffer = new byte[regionSize];
-                        if (ReadProcessMemory(processHandle, memInfo.BaseAddress, buffer, buffer.Length, out int bytesRead) && bytesRead > 0)
+                        lock (BufferLock)
                         {
-                            strings.AddRange(ExtractAsciiStrings(buffer, minLength));
-                            if (!asciiOnly)
+                            long offset = 0;
+                            while (offset < regionSize)
                             {
-                                strings.AddRange(ExtractUnicodeStrings(buffer, minLength));
+                                int toRead = (int)Math.Min(SharedBuffer.Length, regionSize - offset);
+                                if (ReadProcessMemory(processHandle, new IntPtr(memInfo.BaseAddress.ToInt64() + offset), SharedBuffer, toRead, out int bytesRead) && bytesRead > 0)
+                                {
+                                    // Extract from chunk
+                                    strings.AddRange(ExtractAsciiStrings(SharedBuffer, bytesRead, minLength));
+                                    if (!asciiOnly)
+                                    {
+                                        strings.AddRange(ExtractUnicodeStrings(SharedBuffer, bytesRead, minLength));
+                                    }
+                                }
+                                offset += toRead;
                             }
                         }
                     }
@@ -180,10 +193,10 @@ namespace Processes.Core.Util
         }
 
         /// Extracts ASCII printable strings from buffer
-        private static IEnumerable<string> ExtractAsciiStrings(byte[] buffer, int minLength)
+        private static IEnumerable<string> ExtractAsciiStrings(byte[] buffer, int length, int minLength)
         {
             var sb = new StringBuilder();
-            for (int i = 0; i < buffer.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 byte b = buffer[i];
                 if (b >= 32 && b <= 126)
@@ -202,10 +215,10 @@ namespace Processes.Core.Util
         }
 
         /// Extracts Unicode UTF16 strings from buffer
-        private static IEnumerable<string> ExtractUnicodeStrings(byte[] buffer, int minLength)
+        private static IEnumerable<string> ExtractUnicodeStrings(byte[] buffer, int length, int minLength)
         {
             var sb = new StringBuilder();
-            for (int i = 0; i < buffer.Length - 1; i += 2)
+            for (int i = 0; i < length - 1; i += 2)
             {
                 char c = (char)(buffer[i] | (buffer[i + 1] << 8));
                 if (c >= 32 && !char.IsControl(c))

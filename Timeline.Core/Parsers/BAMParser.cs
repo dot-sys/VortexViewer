@@ -9,10 +9,10 @@ using Registry.Abstractions;
 using Timeline.Core.Models;
 using Timeline.Core.Util;
 
-// Parse BAM entries to extract execution timestamps
+// Parser for Background Activity Moderator
 namespace Timeline.Core.Parsers
 {
-    // Parse Background Activity Moderator registry keys
+    // Extracts execution history from BAM
     public static class BAMParser
     {
         private static readonly SemaphoreSlim BamSemaphore = new SemaphoreSlim(Environment.ProcessorCount, Environment.ProcessorCount);
@@ -20,9 +20,7 @@ namespace Timeline.Core.Parsers
         private const int MaxValueDataSize = 1024;
         private const int MaxSubKeyCount = 1000;
 
-        /// <summary>
-        /// Async version of ParseBAMKey with progress reporting, batching, and validation.
-        /// </summary>
+        // Main parsing entry point
         public static async Task<List<RegistryEntry>> ParseBAMKeyAsync(RegistryKey bamUserSettingsKey, IProgress<int> progress, CancellationToken cancellationToken)
         {
             await BamSemaphore.WaitAsync(cancellationToken);

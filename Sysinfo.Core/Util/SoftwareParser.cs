@@ -116,7 +116,23 @@ namespace SysInfo.Core.Util
         {
             try
             {
-                // Try WMI first for more reliable install date
+                // Try 64-bit registry first (AV friendly)
+                using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                using (var key = baseKey.OpenSubKey(WindowsNtCurrentVersion))
+                {
+                    var installDate = key?.GetValue("InstallDate");
+                    if (installDate != null)
+                    {
+                        var timestamp = Convert.ToInt64(installDate);
+                        if (timestamp > 0)
+                        {
+                            var dateTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).LocalDateTime;
+                            return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                    }
+                }
+
+                // Fallback to WMI
                 var query = "SELECT InstallDate FROM Win32_OperatingSystem";
                 using (var searcher = new ManagementObjectSearcher(query))
                 {
@@ -128,18 +144,6 @@ namespace SysInfo.Core.Util
                             var parsedDate = ManagementDateTimeConverter.ToDateTime(installDate);
                             return parsedDate.ToString("yyyy-MM-dd HH:mm:ss");
                         }
-                    }
-                }
-                
-                // Fallback to registry
-                using (var key = Registry.LocalMachine.OpenSubKey(WindowsNtCurrentVersion))
-                {
-                    var installDate = key?.GetValue("InstallDate");
-                    if (installDate != null)
-                    {
-                        var timestamp = Convert.ToInt64(installDate);
-                        var dateTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).LocalDateTime;
-                        return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
                     }
                 }
             }
@@ -424,6 +428,18 @@ namespace SysInfo.Core.Util
         {
             try
             {
+                // Check service status first (most reliable and AV friendly)
+                using (var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\WinDefend"))
+                {
+                    var start = key?.GetValue("Start");
+                    if (start != null)
+                    {
+                        int startValue = Convert.ToInt32(start);
+                        if (startValue == 4) return "Disabled (Service)";
+                        if (startValue == 2 || startValue == 3) return "Enabled (Service)";
+                    }
+                }
+
                 using (var key = Registry.LocalMachine.OpenSubKey(DefenderRoot))
                 {
                     var disableAntiSpyware = key?.GetValue("DisableAntiSpyware");
@@ -436,18 +452,6 @@ namespace SysInfo.Core.Util
                     var disableAntiSpyware = key?.GetValue("DisableAntiSpyware");
                     if (disableAntiSpyware != null)
                         return Convert.ToInt32(disableAntiSpyware) == 1 ? "Disabled" : "Enabled";
-                }
-
-                using (var searcher = new System.Management.ManagementObjectSearcher(@"root\Microsoft\Windows\Defender", "SELECT * FROM MSFT_MpComputerStatus"))
-                using (var collection = searcher.Get())
-                {
-                    var obj = collection.Cast<System.Management.ManagementObject>().FirstOrDefault();
-                    if (obj != null)
-                    {
-                        var antivirusEnabled = obj["AntivirusEnabled"];
-                        if (antivirusEnabled != null)
-                            return Convert.ToBoolean(antivirusEnabled) ? "Enabled" : "Disabled";
-                    }
                 }
             }
             catch
@@ -468,7 +472,10 @@ namespace SysInfo.Core.Util
                 {
                     $@"{DefenderExclusionsRoot}\Paths",
                     $@"{DefenderExclusionsRoot}\Extensions",
-                    $@"{DefenderExclusionsRoot}\Processes"
+                    $@"{DefenderExclusionsRoot}\Processes",
+                    $@"SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Paths",
+                    $@"SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Extensions",
+                    $@"SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Processes"
                 };
 
                 foreach (var path in exclusionPaths)
@@ -492,30 +499,12 @@ namespace SysInfo.Core.Util
                     {
                     }
                 }
-
-                try
-                {
-                    using (var searcher = new System.Management.ManagementObjectSearcher(@"root\Microsoft\Windows\Defender", "SELECT * FROM MSFT_MpPreference"))
-                    using (var collection = searcher.Get())
-                    {
-                        var obj = collection.Cast<System.Management.ManagementObject>().FirstOrDefault();
-                        if (obj != null)
-                        {
-                            AddExclusionsFromArray(exclusions, obj["ExclusionPath"] as string[]);
-                            AddExclusionsFromArray(exclusions, obj["ExclusionExtension"] as string[]);
-                            AddExclusionsFromArray(exclusions, obj["ExclusionProcess"] as string[]);
-                        }
-                    }
-                }
-                catch
-                {
-                }
             }
             catch
             {
             }
 
-            return exclusions.Count == 0 ? "None" : string.Join(", ", exclusions);
+            return exclusions.Count == 0 ? "None" : string.Join(", ", exclusions.Distinct());
         }
 
         // Adds unique exclusion items to exclusions list

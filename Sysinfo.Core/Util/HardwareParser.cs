@@ -18,19 +18,41 @@ namespace SysInfo.Core.Util
 
             try
             {
-                info.CpuModel = GetWmiProperty("Win32_Processor", "Name");
-                info.CpuSerial = GetWmiProperty("Win32_Processor", "ProcessorId");
+                // Use 64-bit registry view for CPU info
+                using (var baseKey = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry64))
+                using (var key = baseKey.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0"))
+                {
+                    info.CpuModel = key?.GetValue("ProcessorNameString")?.ToString()?.Trim() ?? "Unavailable";
+                    // CPU Serial (ProcessorId) is best retrieved via WMI
+                    info.CpuSerial = GetWmiProperty("Win32_Processor", "ProcessorId");
+                }
                 
                 GetGpuInfo(out string gpuChipset, out string gpuName);
                 info.GpuChipset = gpuChipset;
                 info.GpuModel = gpuName;
                 
-                info.MotherboardModel = GetWmiProperty("Win32_BaseBoard", "Product");
-                info.MotherboardSerial = GetWmiProperty("Win32_BaseBoard", "SerialNumber");
-                
-                info.BiosVendor = GetWmiProperty("Win32_BIOS", "Manufacturer");
-                info.BiosVersion = GetWmiProperty("Win32_BIOS", "SMBIOSBIOSVersion");
-                info.BiosUuid = GetWmiProperty("Win32_ComputerSystemProduct", "UUID");
+                using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\BIOS"))
+                {
+                    info.MotherboardModel = key?.GetValue("BaseBoardProduct")?.ToString()?.Trim() ?? "Unavailable";
+                    
+                    // WMI is required for 100% correct Hardware Serials
+                    info.MotherboardSerial = GetWmiProperty("Win32_BaseBoard", "SerialNumber");
+                    if (string.IsNullOrEmpty(info.MotherboardSerial) || info.MotherboardSerial == "Unavailable")
+                    {
+                        info.MotherboardSerial = key?.GetValue("BaseBoardSerialNumber")?.ToString()?.Trim() ?? "Unavailable";
+                    }
+                    
+                    info.BiosVendor = key?.GetValue("BIOSVendor")?.ToString()?.Trim() ?? "Unavailable";
+                    
+                    var biosVersion = key?.GetValue("BIOSVersion");
+                    if (biosVersion is string[] versionArray)
+                        info.BiosVersion = string.Join(" ", versionArray).Trim();
+                    else
+                        info.BiosVersion = biosVersion?.ToString()?.Trim() ?? "Unavailable";
+                        
+                    // BIOS UUID MUST come from WMI for correctness
+                    info.BiosUuid = GetWmiProperty("Win32_ComputerSystemProduct", "UUID");
+                }
                 
                 GetSystemDriveInfo(out string driveModel, out string driveSerial);
                 info.HardDriveModel = driveModel;
@@ -82,23 +104,15 @@ namespace SysInfo.Core.Util
         {
             try
             {
-                var sb = new StringBuilder();
-                using (var searcher = new ManagementObjectSearcher("SELECT MACAddress FROM Win32_NetworkAdapter WHERE MACAddress IS NOT NULL"))
-                using (var collection = searcher.Get())
-                {
-                    foreach (ManagementObject obj in collection.Cast<ManagementObject>())
-                    {
-                        var mac = obj["MACAddress"]?.ToString();
-                        if (!string.IsNullOrWhiteSpace(mac))
-                        {
-                            if (sb.Length > 0)
-                                sb.Append(", ");
-                            sb.Append(mac);
-                        }
-                    }
-                }
+                var macs = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(nic => nic.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up && 
+                                  nic.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+                    .Select(nic => nic.GetPhysicalAddress().ToString())
+                    .Where(mac => !string.IsNullOrEmpty(mac))
+                    .Select(mac => string.Join(":", Enumerable.Range(0, 6).Select(i => mac.Substring(i * 2, 2))));
 
-                return sb.Length > 0 ? sb.ToString() : "Unavailable";
+                var result = string.Join(", ", macs);
+                return string.IsNullOrEmpty(result) ? "Unavailable" : result;
             }
             catch
             {

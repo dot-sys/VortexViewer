@@ -101,7 +101,7 @@ WindowStartupLocation="CenterOwner">
                 
                 <!-- Content Area -->
                 <ContentPresenter Grid.Column="1" 
-                                  x:Name="ContentPresenter" 
+                                  x:Name="MainContentPresenter" 
                                   Content="{Binding}" />
             </Grid>
 

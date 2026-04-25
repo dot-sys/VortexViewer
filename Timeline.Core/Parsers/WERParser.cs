@@ -7,11 +7,10 @@ using Timeline.Core.Models;
 using Timeline.Core.Util;
 using System.Collections.Concurrent;
 
+// Parser for Windows Error Reporting
 namespace Timeline.Core.Parsers
 {
-    /// <summary>
-    /// Represents a parsed WER (Windows Error Reporting) crash entry
-    /// </summary>
+    // Parsed crash entry record
     internal class WEREntry
     {
         public DateTime Timestamp { get; set; }
@@ -19,11 +18,10 @@ namespace Timeline.Core.Parsers
         public string ReportFile { get; set; }
     }
 
+    // Extract reports from ProgramData
     public static class WERParser
     {
-        /// <summary>
-        /// Parse WER crash reports from C:\ProgramData\Microsoft\Windows\WER
-        /// </summary>
+        // Main parsing entry point
         public static List<RegistryEntry> ParseWERReports(Action<string> logger = null)
         {
             var timelineEntries = new List<RegistryEntry>();
@@ -82,9 +80,7 @@ namespace Timeline.Core.Parsers
             return timelineEntries;
         }
 
-        /// <summary>
-        /// Parse all WER reports in a directory
-        /// </summary>
+        // Parse all reports in directory
         private static List<RegistryEntry> ParseWERDirectory(string directoryPath)
         {
             var entries = new List<RegistryEntry>();
@@ -131,10 +127,7 @@ namespace Timeline.Core.Parsers
             return entries;
         }
 
-        /// <summary>
-        /// Parse a single WER report directory
-        /// Looks for Report.wer or .xml files to extract crash information
-        /// </summary>
+        // Parse single report folder
         private static WEREntry ParseWERReportDirectory(string reportDir)
         {
             try
@@ -168,9 +161,7 @@ namespace Timeline.Core.Parsers
             }
         }
 
-        /// <summary>
-        /// Parse Report.wer file (INI-like text format)
-        /// </summary>
+        // Parse text report format
         private static WEREntry ParseReportWerFile(string werFilePath, string reportDir)
         {
             try
@@ -242,9 +233,7 @@ namespace Timeline.Core.Parsers
             }
         }
 
-        /// <summary>
-        /// Parse XML report file
-        /// </summary>
+        // Parse XML report format
         private static WEREntry ParseReportXmlFile(string xmlFilePath, string reportDir)
         {
             try
@@ -293,16 +282,13 @@ namespace Timeline.Core.Parsers
             }
         }
 
-        /// <summary>
-        /// Convert a WER entry to a timeline entry
-        /// </summary>
+        // Convert to shared model
         private static RegistryEntry ConvertToTimelineEntry(WEREntry werEntry)
         {
             if (werEntry == null)
                 return null;
 
-            // FIXED: Assume WER timestamps are already in local time
-            // WER stores times in local time, not UTC
+            // WER stores local time
             var timelineEntry = new RegistryEntry
             {
                 Timestamp = new DateTimeOffset(werEntry.Timestamp, TimeZoneInfo.Local.GetUtcOffset(werEntry.Timestamp)),

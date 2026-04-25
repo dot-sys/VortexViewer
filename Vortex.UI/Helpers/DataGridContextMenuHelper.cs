@@ -137,51 +137,34 @@ namespace Vortex.UI.Helpers
         {
             try
             {
-                Type shellType = Type.GetTypeFromProgID("Shell.Application");
-                dynamic shell = Activator.CreateInstance(shellType);
-                
-                try
+                IntPtr pidl = ILCreateFromPathW(folderPath);
+                if (pidl != IntPtr.Zero)
                 {
-                    var windows = shell.Windows();
-                    bool navigated = false;
-
-                    foreach (dynamic window in windows)
+                    try
                     {
-                        try
-                        {
-                            string windowName = window.Name;
-                            if (windowName != null && windowName.Contains("Explorer"))
-                            {
-                                window.Navigate(folderPath);
-                                
-                                int hwnd = window.HWND;
-                                SetForegroundWindow(new IntPtr(hwnd));
-                                
-                                navigated = true;
-                                break;
-                            }
-                        }
-                        catch
-                        {
-                            continue;
-                        }
+                        SHOpenFolderAndSelectItems(pidl, 0, null, 0);
                     }
-
-                    if (!navigated)
+                    finally
                     {
-                        Process.Start("explorer.exe", $"/e,\"{folderPath}\"");
+                        ILFree(pidl);
                     }
-                }
-                finally
-                {
-                    System.Runtime.InteropServices.Marshal.ReleaseComObject(shell);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                Process.Start("explorer.exe", $"/e,\"{folderPath}\"");
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+                throw;
             }
         }
+
+        [System.Runtime.InteropServices.DllImport("shell32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern IntPtr ILCreateFromPathW(string pszPath);
+
+        [System.Runtime.InteropServices.DllImport("shell32.dll")]
+        private static extern int SHOpenFolderAndSelectItems(IntPtr pidlFolder, uint cidl, IntPtr[] apidl, uint dwFlags);
+
+        [System.Runtime.InteropServices.DllImport("shell32.dll")]
+        private static extern void ILFree(IntPtr pidl);
 
         // Windows API for window focus
         [System.Runtime.InteropServices.DllImport("user32.dll")]

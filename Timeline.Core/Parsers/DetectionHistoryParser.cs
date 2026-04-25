@@ -7,17 +7,15 @@ using Timeline.Core.Util;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-// Parses Windows Defender detection history files
+// Parser for Windows Defender history
 namespace Timeline.Core.Parsers
 {
-    // Extracts threat detection records from binary files
+    // Extracts threat data from binary files
     public static class DetectionHistoryParser
     {
         private const string DETECTION_HISTORY_PATH = @"ProgramData\Microsoft\Windows Defender\Scans\History\Service\DetectionHistory";
 
-        /// <summary>
-        /// Parse Windows Defender Detection History files
-        /// </summary>
+        // Main parsing entry point
         public static List<RegistryEntry> ParseDetectionHistory(Action<string> _ = null)
         {
             var timelineEntries = new List<RegistryEntry>();
@@ -63,7 +61,7 @@ namespace Timeline.Core.Parsers
                                     Timestamp = new DateTimeOffset(fi.CreationTime),
                                     Path = StringPool.InternPath(detectionPath),
                                     Description = StringPool.InternDescription("Threat"),
-                                    Source = StringPool.InternSource("DetectHistory"),
+                                    Source = StringPool.InternSource("DetectionHistory"),
                                     OtherInfo = StringPool.InternOtherInfo(threatName)
                                 };
 
@@ -88,9 +86,7 @@ namespace Timeline.Core.Parsers
             return timelineEntries;
         }
 
-        /// <summary>
-        /// Extract file path - returns the first valid path found (the actual detection target)
-        /// </summary>
+        // Find detection target path
         private static string ExtractFilePath(byte[] data)
         {
             // Look for drive letter pattern (C:\, D:\, etc.) in Unicode
@@ -116,9 +112,7 @@ namespace Timeline.Core.Parsers
             return "Unknown Path";
         }
 
-        /// <summary>
-        /// Extract threat name from the file
-        /// </summary>
+        // Extract name of detected threat
         private static string ExtractThreatName(byte[] data)
         {
             // Look for common threat prefixes
@@ -155,9 +149,7 @@ namespace Timeline.Core.Parsers
             return "Unknown Threat";
         }
 
-        /// <summary>
-        /// Validate if a string looks like a valid threat name
-        /// </summary>
+        // Verify threat name format
         private static bool IsValidThreatName(string name)
         {
             if (string.IsNullOrWhiteSpace(name) || name.Length < 3)
@@ -180,9 +172,7 @@ namespace Timeline.Core.Parsers
             return totalCount > 0 && (printableCount * 100 / totalCount) >= 70;
         }
 
-        /// <summary>
-        /// Clean up extracted path string
-        /// </summary>
+        // Cleanup raw path string
         private static string CleanPath(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -206,9 +196,7 @@ namespace Timeline.Core.Parsers
             return sb.ToString().Trim();
         }
 
-        /// <summary>
-        /// Validate if a string looks like a valid file path
-        /// </summary>
+        // Verify file path format
         private static bool IsValidPath(string path)
         {
             if (string.IsNullOrWhiteSpace(path) || path.Length < 6)
@@ -229,9 +217,7 @@ namespace Timeline.Core.Parsers
             return true;
         }
 
-        /// <summary>
-        /// Extract Unicode string from byte array
-        /// </summary>
+        // Read unicode string from array
         private static string ExtractUnicodeString(byte[] data, int startOffset, int maxLength)
         {
             var sb = new StringBuilder();
@@ -256,9 +242,7 @@ namespace Timeline.Core.Parsers
             return string.IsNullOrWhiteSpace(result) ? "Unknown" : result;
         }
 
-        /// <summary>
-        /// Find byte pattern in array
-        /// </summary>
+        // Locate byte sequence in array
         private static int FindBytes(byte[] haystack, byte[] needle)
         {
             for (int i = 0; i <= haystack.Length - needle.Length; i++)
@@ -271,9 +255,7 @@ namespace Timeline.Core.Parsers
             return -1;
         }
 
-        /// <summary>
-        /// Check if byte pattern exists at specific position
-        /// </summary>
+        // Match byte sequence at offset
         private static bool FindBytesAt(byte[] haystack, byte[] needle, int position)
         {
             if (position + needle.Length > haystack.Length)

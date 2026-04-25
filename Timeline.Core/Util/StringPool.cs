@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 // String interning compatibility layer
 namespace Timeline.Core.Util
 {
-    // Legacy string pool (deprecated)
+    // Static string interning container
     public static class StringPool
     {
         public static string InternDescription(string value)

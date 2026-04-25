@@ -396,6 +396,13 @@ namespace Drives.Core.Core
                 {
                     entry.DeviceName = "(Virtual Drive)";
                 }
+
+                // Generic identification of virtual drives via BusType if available
+                if (entry.BusType != null && (entry.BusType.Equals("Virtual", StringComparison.OrdinalIgnoreCase) || 
+                                             entry.BusType.Equals("File Backed", StringComparison.OrdinalIgnoreCase)))
+                {
+                    entry.DeviceName = "(Virtual Drive)";
+                }
             }
         }
 

@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
 
-/// Process memory analysis utilities
+// Process memory analysis utilities
 namespace Processes.Core.Util
 {
-    /// Stores process name and uptime info
+    // Container for process uptime data
     public class ProcessUptimeInfo
     {
-        /// Display name of the process
+        // Display name
         public string Name { get; }
-        /// Formatted uptime duration string
+        // Formatted duration string
         public string Uptime { get; }
 
         /// Creates uptime info with values
@@ -25,7 +25,7 @@ namespace Processes.Core.Util
         public override string ToString() => $"{Name,-16} {Uptime}";
     }
 
-    /// Collects uptime for target processes
+    // Collector for process execution times
     public static class ProcessUptimeCollector
     {
         /// List of monitored process names

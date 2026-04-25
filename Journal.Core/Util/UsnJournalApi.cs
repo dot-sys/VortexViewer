@@ -1,13 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 using VortexViewer.Journal.Core.Models;
 
+// USN Change Journal API wrapper
 namespace VortexViewer.Journal.Core.Util
 {
+    // Native methods for journal access
     public static class UsnJournalApi
     {
         private const uint FSCTL_QUERY_USN_JOURNAL = 0x000900f4;
@@ -75,13 +76,6 @@ namespace VortexViewer.Journal.Core.Util
             out uint lpBytesReturned,
             IntPtr lpOverlapped);
 
-        public static List<string> GetNTFSDivides()
-        {
-            return DriveInfo.GetDrives()
-                .Where(d => d.IsReady && d.DriveType != DriveType.CDRom && d.DriveFormat == "NTFS")
-                .Select(d => d.Name)
-                .ToList();
-        }
 
         public static UsnJournalInfo QueryJournal(string driveLetter)
         {
@@ -119,12 +113,10 @@ namespace VortexViewer.Journal.Core.Util
                     var data = (USN_JOURNAL_DATA)Marshal.PtrToStructure(ptr, typeof(USN_JOURNAL_DATA));
                     return new UsnJournalInfo
                     {
-                        DriveLetter = driveLetter,
                         JournalId = data.UsnJournalID,
                         MaximumSize = data.MaximumSize,
                         AllocationDelta = data.AllocationDelta,
                         FirstUsn = data.FirstUsn,
-                        NextUsn = data.NextUsn
                     };
                 }
                 finally
@@ -248,16 +240,5 @@ namespace VortexViewer.Journal.Core.Util
             return entries;
         }
 
-        public static List<string> GetDrivesWithUsnJournal()
-        {
-            var ntfsDrives = GetNTFSDivides();
-            var drivesWithUsn = new List<string>();
-            foreach (var drive in ntfsDrives)
-            {
-                if (QueryJournal(drive) != null)
-                    drivesWithUsn.Add(drive);
-            }
-            return drivesWithUsn;
-        }
     }
 }

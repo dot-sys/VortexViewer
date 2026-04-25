@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Lnk;
 using Timeline.Core.Models;
 
-// Parses shortcut files from Recent folder
+// Parser for Recent folder shortcut files
 namespace Timeline.Core.Parsers
 {
-    // Extracts file access history from lnk files
+    // Extracts history from lnk files
     public static class RecentItemsParser
     {
         public static List<RegistryEntry> ParseRecentItems(Action<string> logAction = null)

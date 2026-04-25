@@ -1,3 +1,20 @@
+#### Changelog v1.2
+---
+##### General
+- Reduced AV/EDR false positives by refactoring API patterns
+- Optimized Garbage Collection and memory management.
+
+##### Timeline
+- Improved signature status detection logic
+- Implemented `StringPool` to reduce memory overhead during evidence aggregation.
+- Hardened parsing logic for Event Logs and Registry Hives to eliminate runtime exceptions.
+
+##### Journal & Drives
+- Optimized parent-path construction for more reliable full path resolution
+
+##### Processes
+- Improved handling of SeDebugPrivilege and PPL constraints in memory scanner
+
 #### Changelog v1.1
 ---
 ##### General

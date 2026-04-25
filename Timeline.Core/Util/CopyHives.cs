@@ -42,6 +42,18 @@ namespace Timeline.Core.Util
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool CloseHandle(IntPtr hObject);
 
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int RegOpenKeyEx(IntPtr hKey, string lpSubKey, uint ulOptions, int samDesired, out IntPtr phkResult);
+
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int RegSaveKeyEx(IntPtr hKey, string lpFile, IntPtr lpSecurityAttributes, uint Flags);
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern int RegCloseKey(IntPtr hKey);
+
+        private static readonly IntPtr HKEY_LOCAL_MACHINE = new IntPtr(unchecked((int)0x80000002));
+        private static readonly IntPtr HKEY_CURRENT_USER = new IntPtr(unchecked((int)0x80000001));
+
         [StructLayout(LayoutKind.Sequential)]
         private struct LUID
         {
@@ -119,7 +131,7 @@ namespace Timeline.Core.Util
 
                 if (!tempFilePaths.Any())
                 {
-                    throw new InvalidOperationException("Failed to export any registry hives. Ensure the application is running with administrator privileges.");
+                    progress?.Report("Warning: No registry hives were exported.");
                 }
             }
             catch (Exception ex)
@@ -210,8 +222,7 @@ namespace Timeline.Core.Util
                 var result = await Task.Run(() =>
                 {
                     var upperHiveName = hiveName.ToUpperInvariant();
-                    bool isSystemHive = upperHiveName == "SYSTEM" || upperHiveName == "SOFTWARE" || 
-                                       upperHiveName == "SAM" || upperHiveName == "SECURITY";
+                    bool isSystemHive = upperHiveName == "SYSTEM" || upperHiveName == "SOFTWARE";
                     
                     if (!isSystemHive && !File.Exists(livePath))
                     {
@@ -246,114 +257,55 @@ namespace Timeline.Core.Util
                 
                 if (string.IsNullOrEmpty(regKeyPath))
                 {
-                    progress?.Report($"Warning: No registry key path found for {hiveName}");
-                    
                     try
                     {
                         if (File.Exists(sourcePath))
                         {
                             File.Copy(sourcePath, destPath, true);
-                            if (File.Exists(destPath))
-                            {
-                                var fileInfo = new FileInfo(destPath);
-                                return true;
-                            }
+                            return File.Exists(destPath);
                         }
                     }
-                    catch (Exception)
-                    {
-                    }
-                    
+                    catch { }
                     return false;
                 }
 
-
                 if (File.Exists(destPath))
                 {
-                    File.Delete(destPath);
+                    try { File.Delete(destPath); } catch { return false; }
                 }
 
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = "reg.exe",
-                    Arguments = $"save \"{regKeyPath}\" \"{destPath}\" /y",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
+                IntPtr hRoot = regKeyPath.StartsWith("HKLM") ? HKEY_LOCAL_MACHINE : HKEY_CURRENT_USER;
+                string subKey = regKeyPath.Contains("\\") ? regKeyPath.Substring(regKeyPath.IndexOf('\\') + 1) : "";
+                if (regKeyPath == "HKCU") subKey = "";
 
-                using (var process = new Process { StartInfo = startInfo })
+                // KEY_QUERY_VALUE (0x1) | KEY_ENUMERATE_SUB_KEYS (0x8)
+                int openResult = RegOpenKeyEx(hRoot, subKey, 0, 0x1 | 0x8, out IntPtr hKey);
+                if (openResult == 0)
                 {
                     try
                     {
-                        process.Start();
-                    }
-                    catch (System.ComponentModel.Win32Exception)
-                    {
-                        try
+                        // REG_STANDARD_FORMAT (1)
+                        int saveResult = RegSaveKeyEx(hKey, destPath, IntPtr.Zero, 1);
+
+                        if (saveResult == 0)
                         {
-                            if (File.Exists(sourcePath))
-                            {
-                                File.Copy(sourcePath, destPath, true);
-                                if (File.Exists(destPath))
-                                {
-                                    var fileInfo = new FileInfo(destPath);
-                                    return true;
-                                }
-                            }
-                        }
-                        catch (Exception)
-                        {
+                            return File.Exists(destPath);
                         }
                         
-                        return false;
+                        progress?.Report($"RegSaveKeyEx error for {hiveName}: {saveResult}");
                     }
-                    
-                    string output = process.StandardOutput.ReadToEnd();
-                    string error = process.StandardError.ReadToEnd();
-                    
-                    process.WaitForExit(30000);
-                    
-                    if (!process.HasExited)
+                    finally
                     {
-                        try { process.Kill(); } catch { }
-                        progress?.Report($"Timeout saving {hiveName}");
-                        return false;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(error))
-                    {
-                        progress?.Report($"Error saving {hiveName}: {error.Trim()}");
-                    }
-
-                    if (process.ExitCode == 0 && File.Exists(destPath))
-                    {
-                        var fileInfo = new FileInfo(destPath);
-                        return true;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            if (File.Exists(sourcePath))
-                            {
-                                File.Copy(sourcePath, destPath, true);
-                                if (File.Exists(destPath))
-                                {
-                                    var fileInfo = new FileInfo(destPath);
-                                    return true;
-                                }
-                            }
-                        }
-                        catch (Exception)
-                        {
-                        }
-                        
-                        return false;
+                        RegCloseKey(hKey);
                     }
                 }
+                else
+                {
+                    progress?.Report($"RegOpenKeyEx error for {hiveName}: {openResult}");
+                }
+
+                // Fallback is impossible for live system hives without VSS/API
+                return false;
             }
             catch (Exception ex)
             {
@@ -371,10 +323,6 @@ namespace Timeline.Core.Util
                 return "HKLM\\SYSTEM";
             if (upperHiveName == "SOFTWARE")
                 return "HKLM\\SOFTWARE";
-            if (upperHiveName == "SAM")
-                return "HKLM\\SAM";
-            if (upperHiveName == "SECURITY")
-                return "HKLM\\SECURITY";
             
             if (upperHiveName.StartsWith("NTUSER.DAT"))
             {

@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# AI Tools & Agents
+.agents/
+.serena/
+.antigravity/
+skills-lock.json
+
+# Local Build Logs
+*.log
+/.github/agents

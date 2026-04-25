@@ -9,10 +9,10 @@ using Timeline.Core.Util;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-// Prefetch parsing utilities for timeline reconstruction
+// Prefetch parsing for timeline reconstruction
 namespace Timeline.Core.Parsers
 {
-    // Represent essential parsed prefetch data
+    // Essential parsed prefetch data
     internal class PrefetchEntry
     {
         public string ExecutableFilename { get; set; }
@@ -34,7 +34,7 @@ namespace Timeline.Core.Parsers
         }
     }
 
-    // Convert prefetch files into timeline registry entries
+    // Extract execution history from prefetch
     public static class PrefetchParser
     {
         private static readonly Regex VolumeGuidRegex = new Regex(@"^VOLUME\{([0-9a-fA-F\-]+)\}\\(.+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
